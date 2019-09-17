@@ -2,10 +2,12 @@ import cv2
 import numpy as np
 import math
 
-HEIGHT, WIDTH = 480, 480 # DEFAULT VALUES
+
+# Experimental values
+WIDTH, HEIGHT = 480, 320
 IMAGE_COUNT = 0
-DIVISIONS = 7
-PATH_ASFALT0  = 'asfalto.jpg'
+DIVISIONS = 3
+PATH_ASFALTO  = 'asfalto.jpg'
 PATH_TEMPLATE = 'template.png'
 
 def show_image(image):
@@ -18,7 +20,7 @@ def save_image(image):
     cv2.imwrite('image_'+str(count)+'.jpg', image)
 
 def get_block_dimensions(image, divisions):
-    w, h, alpha = image.shape
+    h, w, alpha = image.shape
     block_w = math.floor(w/divisions)
     block_h = h
     return block_w, block_h
@@ -28,39 +30,50 @@ def simulate_blocks(image, divisions):
     block_w, block_h = get_block_dimensions(image, divisions)
 
     # Setting colors
-    green = (  0, 255,   0)
-    white = (255, 255, 255)
+    GREEN = (  0, 255,   0)
+    WHITE = (255, 255, 255)
 
-    thickness = 3                # Thickness measured in pixels
+    THICK = 3                # Thickness measured in pixels
 
     # Inserting the lines at the image
     for i in range(1, divisions):
         pos1 = (block_w * i, 0)          # Beggining of the line
         pos2 = (block_w * i, block_h)    # End of the line
 
-        cv2.line(image, pos1, pos2, white, thickness)
+        cv2.line(image, pos1, pos2, WHITE, THICK)
 
 def insert_at_block(image, divisions, block_to_add, template):
-    # Setting the general block dimensions
-    block_w, block_h = get_block_dimensions(image, divisions)
+    # Finding the block limits
+    image_h, image_w, image_c = image.shape
+    block_width = math.ceil(image_w / divisions)
+    block_ul = (block_width * (block_to_add - 1), 0) # Upper left limit of the block
+    block_dr = (block_width * block_to_add, image_h) # Down right limit of the block
 
-    # Setting the specific block dimensions
-    underlimit_x, overlimit_x = (block_to_add) * block_w, (block_to_add + 1) * block_w
+    # cv2.line(image, block_ul, block_dr, (255, 255, 255), 3) # For experimental purposes only
 
-    # Getting the block center (FOR TESTING PURPOSES ONLY)
-    center_x = math.floor((underlimit_x + overlimit_x)/2)
-    center_y = math.floor(block_h/2)
+    # Finding the block mean point
+    ul_x, ul_y = block_ul
+    dr_x, dr_y = block_dr
 
-    # SOME TROUBLES HERE
-    # TODO: FIX
-    # Inserting the template at the center of the block (FOR TESTING PURPOSES ONLY)
-    template_w, template_h, template_alpha = template.shape
-    x_offset = center_x #- math.floor(template_w/2)
-    y_offset = center_y - math.floor(template_h/2)
-    image[y_offset:y_offset+template_w, x_offset:x_offset+template_h] = template
+    mpoint = ((ul_x + dr_x)/2, (ul_y + dr_y)/2) # Creating the mean point as a tuple
+    mpoint_x, mpoint_y = mpoint
+
+    # Finding the template dimensions
+    t_h, t_w, t_c = template.shape
+
+    # Finding the insertion points
+    insertion_ul = (math.ceil(mpoint_x - t_w/2), math.ceil(mpoint_y - t_h/2))
+    insertion_dr = (math.ceil(mpoint_x + t_w/2), math.ceil(mpoint_y + t_h/2))
+    iul_x, iul_y = insertion_ul
+    idr_x, idr_y = insertion_dr
+
+    # cv2.line(image, insertion_ul, insertion_dr, (255, 255, 255), 3) # For experimental purposes only
+
+    # Inserting the image at the points
+    image[iul_y:idr_y, iul_x:idr_x] = template
 
 def get_bg_from_image(dimensions, image_path):
-    HEIGHT, WIDTH = dimensions
+    WIDTH, HEIGHT = dimensions
     img = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
 
     # Convert the image from RGB2RGBA
@@ -71,12 +84,19 @@ def get_bg_from_image(dimensions, image_path):
 
 def get_template_from_image(dimensions, divisions, image_path):
     unchanged_template = cv2.imread(PATH_TEMPLATE, cv2.IMREAD_UNCHANGED)
-    tw, th, ta = unchanged_template.shape # Original template dimensions
+    th, tw, ta = unchanged_template.shape # Original template dimensions
     w, h = dimensions # Background dimensions
-    ratio = th / tw # Original image ratio
+    
+    # Getting the image ratio
+    smaller = th
+    bigger  = tw
+    if tw < th:
+        smaller = tw
+        bigger  = th
+    ratio = smaller / bigger
 
     # Resized image dimensions
-    template_w = math.floor(0.9 * w/divisions)
+    template_w = math.floor(0.9 * w / divisions)
     template_h = math.floor(template_w * ratio)
 
     # Getting template
@@ -84,11 +104,10 @@ def get_template_from_image(dimensions, divisions, image_path):
     template = cv2.resize(unchanged_template, template_dim, interpolation=cv2.INTER_AREA)
     return template
 
-bg = get_bg_from_image((HEIGHT, WIDTH), 'asfalto.jpg') # Sample background
-template = get_template_from_image((HEIGHT, WIDTH), DIVISIONS, PATH_TEMPLATE)
+bg = get_bg_from_image((WIDTH, HEIGHT), PATH_ASFALTO) # Sample background
+template = get_template_from_image((WIDTH, HEIGHT), DIVISIONS, PATH_TEMPLATE)
 simulate_blocks(bg, DIVISIONS)
-insert_at_block(bg, DIVISIONS, 5, template)
-insert_at_block(bg, DIVISIONS, 3, template)
+insert_at_block(bg, DIVISIONS, math.floor(DIVISIONS/2), template)
 save_image(bg)
 
 # TODO: Find out why it only works with square images
