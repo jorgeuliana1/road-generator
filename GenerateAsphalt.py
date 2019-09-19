@@ -6,10 +6,11 @@ import math
 # Experimental values
 WIDTH, HEIGHT = 480, 320
 IMAGE_COUNT = 0
-DIVISIONS = 3
+DIVISIONS = 30
 PATH_ASFALTO  = 'asfalto.jpg'
 PATH_TEMPLATE = 'template.png'
 PATH_WEIRD = 'background.jpg'
+ROTATION_DEGREES = -60
 
 def show_image(image):
     cv2.imshow('image', image)
@@ -126,6 +127,55 @@ def transparent_overlay(background, foreground):
 
     return img
 
+def rotate(image, theta, phi, gamma, dx, dy, dz):
+    h, w, _ = image.shape
+
+    d = np.sqrt(h**2 + w**2)
+    focal = d / (2 * np.sin(gamma) if np.sin(gamma) != 0 else 1)
+    dz = focal
+    f = focal
+
+    # 2D to 3D
+    A1 = np.array([[1,    0, -w/2],
+                   [0,    1, -h/2],
+                   [0,    0,    1],
+                   [0,    0,    1]])
+    
+    # Rotating X, Y and Z
+    RX = np.array([[1, 0, 0, 0],
+                   [0, np.cos(theta), -np.sin(theta), 0],
+                   [0, np.sin(theta), np.cos(theta), 0],
+                   [0, 0, 0, 1]])
+        
+    RY = np.array([[np.cos(phi), 0, -np.sin(phi), 0],
+                   [0, 1, 0, 0],
+                   [np.sin(phi), 0, np.cos(phi), 0],
+                   [0, 0, 0, 1]])
+    
+    RZ = np.array([[np.cos(gamma), -np.sin(gamma), 0, 0],
+                   [np.sin(gamma), np.cos(gamma), 0, 0],
+                   [0, 0, 1, 0],
+                   [0, 0, 0, 1]])
+
+    # Composing R matrix
+    R = np.dot(np.dot(RX, RY), RZ)
+    # Translation matrix
+    T = np.array([[1, 0, 0, dx],
+                  [0, 1, 0, dy],
+                  [0, 0, 1, dz],
+                  [0, 0, 0, 1]])
+    # Converting 3D to 2D again
+    A2 = np.array([[f, 0, w/2, 0],
+                   [0, f, h/2, 0],
+                   [0, 0, 1, 0]])
+
+    # Final transformation matrix
+    TM = np.dot(A2, np.dot(T, np.dot(R, A1)))
+
+    # Using cv2 to warp the image
+    return cv2.warpPerspective(image.copy(), TM, (w, h))
+    
+
 # Testing the code:
 
 dimensions = (WIDTH, HEIGHT) # Defining the dimensions
@@ -139,7 +189,11 @@ insert_at_block(templates, DIVISIONS, math.floor(DIVISIONS/2), sample_template) 
 
 # Joining all the layers
 img = blend_layers(asphalt_bg, templates)
-img = blend_layers(weird_bg, img)
-
 simulate_blocks(img, DIVISIONS) # Small workaround, the simulate_blocks ain't working as I wanted
+
+# Warping perspective
+rotation_radians = ROTATION_DEGREES/180.00 * math.pi
+img = rotate(img, rotation_radians, 0, 0, 0, 0, 0) # Rotating the image in X
+
+img = blend_layers(weird_bg, img)
 save_image(img) # Saving the image
