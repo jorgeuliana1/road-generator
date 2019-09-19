@@ -9,6 +9,7 @@ IMAGE_COUNT = 0
 DIVISIONS = 3
 PATH_ASFALTO  = 'asfalto.jpg'
 PATH_TEMPLATE = 'template.png'
+PATH_WEIRD = 'background.jpg'
 
 def show_image(image):
     cv2.imshow('image', image)
@@ -26,6 +27,7 @@ def get_block_dimensions(image, divisions):
     return block_w, block_h
 
 def simulate_blocks(image, divisions):
+    # TODO: FIX
     # Setting the block dimensions:
     block_w, block_h = get_block_dimensions(image, divisions)
 
@@ -35,7 +37,7 @@ def simulate_blocks(image, divisions):
 
     THICK = 3                # Thickness measured in pixels
 
-    # Inserting the lines at the image
+    # Inserting the lines at the overlay
     for i in range(1, divisions):
         pos1 = (block_w * i, 0)          # Beggining of the line
         pos2 = (block_w * i, block_h)    # End of the line
@@ -104,10 +106,40 @@ def get_template_from_image(dimensions, divisions, image_path):
     template = cv2.resize(unchanged_template, template_dim, interpolation=cv2.INTER_AREA)
     return template
 
-bg = get_bg_from_image((WIDTH, HEIGHT), PATH_ASFALTO) # Sample background
-template = get_template_from_image((WIDTH, HEIGHT), DIVISIONS, PATH_TEMPLATE)
-simulate_blocks(bg, DIVISIONS)
-insert_at_block(bg, DIVISIONS, math.floor(DIVISIONS/2), template)
-save_image(bg)
+def generate_empty_templates_layer(dimensions):
+    w, h = dimensions
+    templates_layer = np.zeros((h, w, 4), np.uint8)
+    return templates_layer
 
-# TODO: Find out why it only works with square images
+def blend_layers(background, foreground):
+    added_image = transparent_overlay(background, foreground)
+    return added_image
+
+def transparent_overlay(background, foreground):
+    h, w, _ = background.shape
+    img = generate_empty_templates_layer((w, h))
+
+    for i in range(h):
+        for j in range(w):
+            alpha = float(foreground[i][j][3] / 255.0)
+            img[i][j] = alpha * foreground[i][j] + (1 - alpha) * background[i][j]
+
+    return img
+
+# Testing the code:
+
+dimensions = (WIDTH, HEIGHT) # Defining the dimensions
+asphalt_bg = get_bg_from_image(dimensions, PATH_ASFALTO) # Defining the bg
+weird_bg = get_bg_from_image(dimensions, PATH_WEIRD) # Defining the weird bg
+sample_template = get_template_from_image(dimensions, DIVISIONS, PATH_TEMPLATE) # Getting the arrow
+templates  = generate_empty_templates_layer(dimensions) # Defining the overlay mask
+
+# simulate_blocks(templates, DIVISIONS) # Painting the overlay mask with the way separation marks
+insert_at_block(templates, DIVISIONS, math.floor(DIVISIONS/2), sample_template) # Painting the overlay mask with the arrow
+
+# Joining all the layers
+img = blend_layers(asphalt_bg, templates)
+img = blend_layers(weird_bg, img)
+
+simulate_blocks(img, DIVISIONS) # Small workaround, the simulate_blocks ain't working as I wanted
+save_image(img) # Saving the image
