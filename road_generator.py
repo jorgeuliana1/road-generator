@@ -1,25 +1,6 @@
-import cv2
 import numpy as np
 import math
-
-
-# Experimental values
-WIDTH, HEIGHT = 480, 320
-IMAGE_COUNT = 0
-DIVISIONS = 3
-PATH_ASFALTO  = 'asfalto.jpg'
-PATH_TEMPLATE = 'template.png'
-PATH_WEIRD = 'background.jpg'
-ROTATION_DEGREES = -60
-
-def show_image(image):
-    cv2.imshow('image', image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
-def save_image(image, title="image_"):
-    count = 0
-    cv2.imwrite(title+str(count)+'.jpg', image)
+import cv2
 
 def get_block_dimensions(image, divisions):
     h, w, alpha = image.shape
@@ -69,25 +50,16 @@ def draw_straight_line(image, pos1, pos2, color, thickness):
 
     image+=overlay
 
-def simulate_blocks(image, divisions):
-    # TODO: FIX
+def simulate_blocks(image, divisions, color, thickness):
     # Setting the block dimensions:
     block_w, block_h = get_block_dimensions(image, divisions)
-
-    # Setting colors
-    # BGR
-    GREEN =  (  0, 255,   0)
-    WHITE =  (255, 255, 255)
-    YELLOW = (255, 255,   0)
-
-    THICK = 3                # Thickness measured in pixels
 
     # Inserting the lines at the overlay
     for i in range(1, divisions):
         pos1 = (block_w * i, 0)          # Beggining of the line
         pos2 = (block_w * i, block_h)    # End of the line
 
-        draw_straight_line(image, pos1, pos2, YELLOW, THICK)
+        draw_straight_line(image, pos1, pos2, color, thickness)
 
 def insert_at_block(image, divisions, block_to_add, template):
     # Finding the block limits
@@ -130,7 +102,7 @@ def get_bg_from_image(dimensions, image_path):
     return cv2.resize(img, dimensions, interpolation=cv2.INTER_AREA)
 
 def get_template_from_image(dimensions, divisions, image_path):
-    unchanged_template = cv2.imread(PATH_TEMPLATE, cv2.IMREAD_UNCHANGED)
+    unchanged_template = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
     th, tw, ta = unchanged_template.shape # Original template dimensions
     w, h = dimensions # Background dimensions
     
@@ -251,26 +223,3 @@ def bring_to_bottom(image):
     new_image[:][counter:h] = image[:][0:h-counter]
 
     return new_image, counter
-    
-
-# Testing the code:
-
-dimensions = (WIDTH, HEIGHT) # Defining the dimensions
-asphalt_bg = get_bg_from_image(dimensions, PATH_ASFALTO) # Defining the bg
-weird_bg = get_bg_from_image(dimensions, PATH_WEIRD) # Defining the weird bg
-sample_template = get_template_from_image(dimensions, DIVISIONS, PATH_TEMPLATE) # Getting the arrow
-templates  = generate_empty_templates_layer(dimensions) # Defining the overlay mask
-
-simulate_blocks(templates, DIVISIONS) # Painting the overlay mask with the way separation marks
-insert_at_block(templates, DIVISIONS, math.floor(DIVISIONS/2), sample_template) # Painting the overlay mask with the arrow
-
-# Joining all the layers
-img = blend_layers(asphalt_bg, templates)
-
-# Warping perspective
-rotation_radians = ROTATION_DEGREES/180.00 * math.pi
-img = rotate(img, rotation_radians, 0, 0, 0, 0, 0) # Rotating the image in X
-img, _ = bring_to_bottom(img) # Bringing template to bottom
-
-img = blend_layers(weird_bg, img)
-save_image(img) # Saving the image
