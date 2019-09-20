@@ -6,7 +6,7 @@ import math
 # Experimental values
 WIDTH, HEIGHT = 480, 320
 IMAGE_COUNT = 0
-DIVISIONS = 30
+DIVISIONS = 3
 PATH_ASFALTO  = 'asfalto.jpg'
 PATH_TEMPLATE = 'template.png'
 PATH_WEIRD = 'background.jpg'
@@ -17,9 +17,9 @@ def show_image(image):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-def save_image(image):
+def save_image(image, title="image_"):
     count = 0
-    cv2.imwrite('image_'+str(count)+'.jpg', image)
+    cv2.imwrite(title+str(count)+'.jpg', image)
 
 def get_block_dimensions(image, divisions):
     h, w, alpha = image.shape
@@ -27,14 +27,58 @@ def get_block_dimensions(image, divisions):
     block_h = h
     return block_w, block_h
 
+def draw_straight_line(image, pos1, pos2, color, thickness):
+    x1, y1 = pos1
+    x2, y2 = pos2
+
+    # Applying thickness:
+    x1 -= thickness
+    x2 += thickness
+    
+    # Rectangle starting at:
+    origin = (x1, y1)
+
+    # Rectangle ending at:
+    destiny = (x2, y2)
+
+    # Getting image dimensions:
+    h, w, _ = image.shape
+
+    # Creating the line overlayer:
+    overlay = np.zeros([h, w, 3], dtype=np.uint8)
+
+    # Defining the alpha channel
+    blue, green, red = cv2.split(overlay)
+    alpha = np.zeros(blue.shape, dtype=blue.dtype)
+    overlay = cv2.merge((blue, green, red, alpha))
+
+    # Creating a pixel of the specified color
+    r, g, b = color
+    pixel = np.zeros([1, 1, 3], dtype=np.uint8)
+    blue, green, red = cv2.split(pixel)
+    alpha = np.ones(blue.shape, dtype=blue.dtype) * 255
+    blue.fill(b)
+    red.fill(r)
+    green.fill(g)
+    pixel = cv2.merge((blue, green, red, alpha))
+
+    # "Painting" the image
+    for i in range(x1, x2):
+        for j in range(y1, y2):
+            overlay[j][i] = pixel
+
+    image+=overlay
+
 def simulate_blocks(image, divisions):
     # TODO: FIX
     # Setting the block dimensions:
     block_w, block_h = get_block_dimensions(image, divisions)
 
     # Setting colors
-    GREEN = (  0, 255,   0)
-    WHITE = (255, 255, 255)
+    # BGR
+    GREEN =  (  0, 255,   0)
+    WHITE =  (255, 255, 255)
+    YELLOW = (255, 255,   0)
 
     THICK = 3                # Thickness measured in pixels
 
@@ -43,7 +87,7 @@ def simulate_blocks(image, divisions):
         pos1 = (block_w * i, 0)          # Beggining of the line
         pos2 = (block_w * i, block_h)    # End of the line
 
-        cv2.line(image, pos1, pos2, WHITE, THICK)
+        draw_straight_line(image, pos1, pos2, YELLOW, THICK)
 
 def insert_at_block(image, divisions, block_to_add, template):
     # Finding the block limits
@@ -184,12 +228,11 @@ weird_bg = get_bg_from_image(dimensions, PATH_WEIRD) # Defining the weird bg
 sample_template = get_template_from_image(dimensions, DIVISIONS, PATH_TEMPLATE) # Getting the arrow
 templates  = generate_empty_templates_layer(dimensions) # Defining the overlay mask
 
-# simulate_blocks(templates, DIVISIONS) # Painting the overlay mask with the way separation marks
+simulate_blocks(templates, DIVISIONS) # Painting the overlay mask with the way separation marks
 insert_at_block(templates, DIVISIONS, math.floor(DIVISIONS/2), sample_template) # Painting the overlay mask with the arrow
 
 # Joining all the layers
 img = blend_layers(asphalt_bg, templates)
-simulate_blocks(img, DIVISIONS) # Small workaround, the simulate_blocks ain't working as I wanted
 
 # Warping perspective
 rotation_radians = ROTATION_DEGREES/180.00 * math.pi
