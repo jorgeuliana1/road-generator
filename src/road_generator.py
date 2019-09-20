@@ -50,7 +50,7 @@ def draw_straight_line(image, pos1, pos2, color, thickness):
 
     image+=overlay
 
-def simulate_blocks(image, divisions, color, thickness):
+def draw_ways(image, divisions, color, thickness):
     # Setting the block dimensions:
     block_w, block_h = get_block_dimensions(image, divisions)
 
@@ -61,14 +61,12 @@ def simulate_blocks(image, divisions, color, thickness):
 
         draw_straight_line(image, pos1, pos2, color, thickness)
 
-def insert_at_block(image, divisions, block_to_add, template):
+def insert_template(image, divisions, block_to_add, template):
     # Finding the block limits
     image_h, image_w, image_c = image.shape
     block_width = math.ceil(image_w / divisions)
     block_ul = (block_width * (block_to_add - 1), 0) # Upper left limit of the block
     block_dr = (block_width * block_to_add, image_h) # Down right limit of the block
-
-    # cv2.line(image, block_ul, block_dr, (255, 255, 255), 3) # For experimental purposes only
 
     # Finding the block mean point
     ul_x, ul_y = block_ul
@@ -86,10 +84,11 @@ def insert_at_block(image, divisions, block_to_add, template):
     iul_x, iul_y = insertion_ul
     idr_x, idr_y = insertion_dr
 
-    # cv2.line(image, insertion_ul, insertion_dr, (255, 255, 255), 3) # For experimental purposes only
-
     # Inserting the image at the points
     image[iul_y:idr_y, iul_x:idr_x] = template
+
+    template_location = ((iul_x, iul_y), (idr_x, idr_y))
+    return template_location
 
 def get_bg_from_image(dimensions, image_path):
     WIDTH, HEIGHT = dimensions
@@ -128,7 +127,7 @@ def generate_empty_templates_layer(dimensions):
     templates_layer = np.zeros((h, w, 4), np.uint8)
     return templates_layer
 
-def blend_layers(background, foreground):
+def blend(background, foreground):
     added_image = transparent_overlay(background, foreground)
     return added_image
 
