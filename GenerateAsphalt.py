@@ -218,6 +218,39 @@ def rotate(image, theta, phi, gamma, dx, dy, dz):
 
     # Using cv2 to warp the image
     return cv2.warpPerspective(image.copy(), TM, (w, h))
+
+def bring_to_bottom(image):
+    # This function brings the template to the bottom of the image
+
+    # Getting image dimensions
+    h, w, _ = image.shape
+
+    # Creating empty template
+    new_image = generate_empty_templates_layer((w, h))
+
+    # Defining a empty line
+    empty_line = np.zeros((1, w, 4), dtype=np.uint8)
+
+    # Counting the amount of lines to go down
+    lines = h
+    counter = 0
+    for i in range(lines):
+
+        a1 = image[:][h - i - 1]
+        a2 = empty_line[:][0]
+
+        # Verifying if the lines are equal
+        equality = np.sum(np.all(np.equal(a1, a2)))
+
+        if equality:
+            counter+= 1
+        else:
+            break
+
+    # Redrawing the image:
+    new_image[:][counter:h] = image[:][0:h-counter]
+
+    return new_image, counter
     
 
 # Testing the code:
@@ -237,6 +270,7 @@ img = blend_layers(asphalt_bg, templates)
 # Warping perspective
 rotation_radians = ROTATION_DEGREES/180.00 * math.pi
 img = rotate(img, rotation_radians, 0, 0, 0, 0, 0) # Rotating the image in X
+img, _ = bring_to_bottom(img) # Bringing template to bottom
 
 img = blend_layers(weird_bg, img)
 save_image(img) # Saving the image
