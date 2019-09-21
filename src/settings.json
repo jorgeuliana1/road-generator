@@ -4,7 +4,7 @@
         "HEIGHT" : 320
     },
     "ROAD_SETTINGS" : {
-        "DIVISIONS" : 5,
+        "DIVISIONS" : 3,
         "LINE_THICKNESS" : 3
     },
     "IMAGE_ROTATION" : {

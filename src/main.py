@@ -48,6 +48,42 @@ def get_parameters(settings_path):
 
     return dimensions, road, paths, rotation
 
+def location_after_perspective(location, rotation_radians):
+    # TODO: FIX
+    # Defining the reference value (in radians)
+    reference_radian = 90.00/(2*math.pi)
+
+    # Getting the values
+    pos0, pos1 = location
+    x0, y0 = pos0
+    x1, y1 = pos1
+
+    # Defining the coeficient
+    coeficient = rotation_radians / reference_radian
+
+    # Updating x:
+    ref_x = (x0 + x1) / 2.00 # Reference value in a cartesian view
+    new_x0, new_x1 = x0 - ref_x, x1 - ref_x # Putting the values in reference with ref_x
+    #new_x0, new_x1 = new_x0 / math.sin(rotation_radians), new_x1 / math.sin(rotation_radians)
+    new_x0, new_x1 = new_x0 + ref_x, new_x1 + ref_x # Putting the values in reference with the image again
+
+    # Updating Y
+    ref_y = (y0 + y1) / 2.00 # Reference value in a cartesian view
+    new_y0, new_y1 = y0 - ref_y, y1 - ref_y # Putting the values in reference with ref_y
+    #new_y0, new_y1 = new_y0 / math.cos(rotation_radians), new_y1 / math.cos(rotation_radians)
+    new_y0, new_y1 = new_y0 + ref_y, new_x1 + ref_y # Putting the values in reference with the image again
+    
+
+    return ((int(new_x0), int(new_y0)), (int(new_x1), int(new_y1)))
+
+def draw_bbox(image, location, color):
+    # Getting Xs and Ys:
+    pos0, pos1 = location
+    x0, y0 = pos0
+    x1, y1 = pos1
+
+    cv2.rectangle(image, (x0, y0), (x1, y1), color, 2)
+
 # Testing the code:
 
 # Setting the parameters
@@ -82,6 +118,7 @@ img, y_update = bring_to_bottom(img) # Bringing template to bottom
 
 # Updating the template location
 # (Don't work as expected yet, it still need to calculate the position change due to the perspective warp)
+template_location = location_after_perspective(template_location, rotation_radians)
 pos0, pos1 = template_location
 x0, y0 = pos0
 x1, y1 = pos1
@@ -90,6 +127,6 @@ y1 += y_update
 pos0 = (x0, y0)
 pos1 = (x1, y1)
 template_location = (pos0, pos1)
-
 img = blend(weird_bg, img)
+draw_bbox(img, template_location, (0, 0, 255))
 save_image(img, path=PATH_DESTINY) # Saving the image
