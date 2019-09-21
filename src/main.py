@@ -2,17 +2,9 @@ import cv2
 import numpy as np
 import math
 from road_generator import *
+import json
 
-
-# Experimental values
-WIDTH, HEIGHT = 480, 320
 IMAGE_COUNT = 0
-DIVISIONS = 3
-PATH_ASFALTO  = 'asphalt_textures/asphalt_001.jpg'
-PATH_TEMPLATE = 'templates/template_001.png'
-PATH_WEIRD = 'backgrounds/bg_001.jpg'
-ROTATION_DEGREES = -60
-LINE_THICKNESS = 3
 
 # BGR
 GREEN =  (  0, 255,   0)
@@ -24,11 +16,50 @@ def show_image(image):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-def save_image(image, title="image_"):
-    count = 0
-    cv2.imwrite(title+str(count)+'.jpg', image)
+def save_image(image, title="", path="image.jpg"):
+    cv2.imwrite(title+path, image)
+
+def get_parameters(settings_path):
+
+    # Opening the JSON file:
+    with open(settings_path, 'r') as f:
+        json_file = json.load(f)
+
+    # Getting the dimensions:
+    dimensions = (int(json_file["IMAGE_DIMENSIONS"]["WIDTH"]), int(json_file["IMAGE_DIMENSIONS"]["HEIGHT"]))
+
+    # Getting the road settings:
+    divisions = int(json_file["ROAD_SETTINGS"]["DIVISIONS"])
+    line_thickness = int(json_file["ROAD_SETTINGS"]["LINE_THICKNESS"])
+    road = {"DIVISIONS" : divisions, "THICKNESS" : line_thickness}
+
+    # Getting the files paths:
+    ground_texture = json_file["PATHS"]["GROUND_TEXTURE"]
+    template = json_file["PATHS"]["TEMPLATE"]
+    bg = json_file["PATHS"]["BACKGROUND_IMAGE"]
+    destiny = json_file["PATHS"]["SAVE_PATH"]
+    paths = {"GROUND" : ground_texture, "TEMPLATE" : template, "BACKGROUND" : bg, "DESTINY" : destiny}
+
+    # Getting the rotation:
+    x = float(json_file["IMAGE_ROTATION"]["X_ROTATION"])
+    y = float(json_file["IMAGE_ROTATION"]["Y_ROTATION"])
+    z = float(json_file["IMAGE_ROTATION"]["Z_ROTATION"])
+    rotation = (x, y, z)
+
+    return dimensions, road, paths, rotation
 
 # Testing the code:
+
+# Setting the parameters
+DIMENSIONS, ROAD, PATHS, ROTATION = get_parameters("settings.json")
+WIDTH, HEIGHT = DIMENSIONS
+DIVISIONS = ROAD["DIVISIONS"]
+LINE_THICKNESS = ROAD["THICKNESS"]
+PATH_ASFALTO = PATHS["GROUND"]
+PATH_TEMPLATE = PATHS["TEMPLATE"]
+PATH_WEIRD = PATHS["BACKGROUND"]
+PATH_DESTINY = PATHS["DESTINY"]
+ROTATION_DEGREES, _, _ = ROTATION
 
 dimensions = (WIDTH, HEIGHT) # Defining the dimensions
 asphalt_bg = get_bg_from_image(dimensions, PATH_ASFALTO) # Defining the bg
@@ -61,4 +92,4 @@ pos1 = (x1, y1)
 template_location = (pos0, pos1)
 
 img = blend(weird_bg, img)
-save_image(img) # Saving the image
+save_image(img, path=PATH_DESTINY) # Saving the image

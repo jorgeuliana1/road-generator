@@ -1,0 +1,21 @@
+{
+    "IMAGE_DIMENSIONS" : {
+        "WIDTH" : 480,
+        "HEIGHT" : 320
+    },
+    "ROAD_SETTINGS" : {
+        "DIVISIONS" : 5,
+        "LINE_THICKNESS" : 3
+    },
+    "IMAGE_ROTATION" : {
+        "X_ROTATION" : -60,
+        "Y_ROTATION" : 0,
+        "Z_ROTATION" : 0
+    },
+    "PATHS" : {
+        "GROUND_TEXTURE" : "asphalt_textures/asphalt_001.jpg",
+        "TEMPLATE" : "templates/template_001.png",
+        "BACKGROUND_IMAGE" : "backgrounds/bg_001.jpg",
+        "SAVE_PATH" : "image_001.jpg"
+    }
+}
