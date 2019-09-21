@@ -49,32 +49,41 @@ def get_parameters(settings_path):
     return dimensions, road, paths, rotation
 
 def location_after_perspective(location, rotation_radians):
-    # TODO: FIX
-    # Defining the reference value (in radians)
-    reference_radian = 90.00/(2*math.pi)
-
-    # Getting the values
+    # Getting Xs and Ys:
     pos0, pos1 = location
     x0, y0 = pos0
     x1, y1 = pos1
 
-    # Defining the coeficient
-    coeficient = rotation_radians / reference_radian
+    # Putting points in cartesian coordinates
+    ref_x = (x0 + x1) / 2
+    ref_y = (y0 + y1) / 2
+    x0, x1 = x0 - ref_x, x1 - ref_x
+    y0, y1 = y0 - ref_y, y1 - ref_y
 
-    # Updating x:
-    ref_x = (x0 + x1) / 2.00 # Reference value in a cartesian view
-    new_x0, new_x1 = x0 - ref_x, x1 - ref_x # Putting the values in reference with ref_x
-    #new_x0, new_x1 = new_x0 / math.sin(rotation_radians), new_x1 / math.sin(rotation_radians)
-    new_x0, new_x1 = new_x0 + ref_x, new_x1 + ref_x # Putting the values in reference with the image again
+    # Converting to 3D points
+    # pos0 = (x0, y0, 0)
+    # pos1 = (x1, y1, 0)
+    # The rotation must follow the rule:
+    # z ** 2 + y ** 2 = y0 ** 2
+    # Thus:
+    # z = y0*cos(radians)
+    # y = y0*sin(radians)
 
-    # Updating Y
-    ref_y = (y0 + y1) / 2.00 # Reference value in a cartesian view
-    new_y0, new_y1 = y0 - ref_y, y1 - ref_y # Putting the values in reference with ref_y
-    #new_y0, new_y1 = new_y0 / math.cos(rotation_radians), new_y1 / math.cos(rotation_radians)
-    new_y0, new_y1 = new_y0 + ref_y, new_x1 + ref_y # Putting the values in reference with the image again
+    # Doing the rotation:
+    pos0 = (x0, y0*math.cos(rotation_radians), y0*math.sin(rotation_radians))
+    pos1 = (x1, y1*math.cos(rotation_radians), y1*math.sin(rotation_radians))
+
+    # Converting to 2D:
+    x0, y0, _ = pos0
+    x1, y1, _ = pos1
+    x0, y0 = x0 * 1.8 + ref_x, y0 * 1.2 + ref_y # Returning to default coordinates
+    x1, y1 = x1 * 1.8 + ref_x, y1 * 1.2 + ref_y # Returning to default coordinates
+    pos0 = (int(x0), int(y0))
+    pos1 = (int(x1), int(y1))
+
+    new_location = (pos0, pos1)
     
-
-    return ((int(new_x0), int(new_y0)), (int(new_x1), int(new_y1)))
+    return new_location
 
 def draw_bbox(image, location, color):
     # Getting Xs and Ys:
