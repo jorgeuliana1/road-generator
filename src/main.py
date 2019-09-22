@@ -87,6 +87,13 @@ def location_after_perspective(location, rotation_radians):
     
     return new_location
 
+def location_after_moving(location, x_movement, y_movement):
+    pos0, pos1 = location
+    x0, y0 = pos0
+    x1, y1 = pos1
+
+    return ((x0 + x_movement, y0 + y_movement), (x1 + x_movement, y0 + y_movement))
+
 def draw_bbox(image, location, color):
     # Getting Xs and Ys:
     pos0, pos1 = location
@@ -109,6 +116,17 @@ def load_templates(path, dimensions, divisions):
     # This function returns a dict containing the templates.
     return templates
 
+def location_tostring(location, template_class):
+    string = ""
+    
+    # Getting Xs and Ys:
+    pos0, pos1 = location
+    x0, y0 = pos0
+    x1, y1 = pos1
+
+    string += str(x0) + "," + str(y0) + "," + str(x1) + "," + str(y1) + "," + template_class
+    return string
+
 # Testing the code:
 
 # Setting the parameters
@@ -128,7 +146,8 @@ templates_dict = load_templates(TEMPLATES, DIMENSIONS, DIVISIONS)
 dimensions = (WIDTH, HEIGHT) # Defining the dimensions
 asphalt_bg = get_bg_from_image(dimensions, PATH_ASFALTO) # Defining the bg
 weird_bg = get_bg_from_image(dimensions, PATH_WEIRD) # Defining the weird bg
-sample_template = templates_dict["RETORNODIREITA"] # Just a sample template
+template_class = PATH_TEMPLATE
+sample_template = templates_dict[template_class] # Just a sample template
 templates = generate_empty_templates_layer(dimensions) # Defining the overlay mask
 
 draw_ways(templates, DIVISIONS, YELLOW, LINE_THICKNESS) # Painting the overlay mask with the way separation marks
@@ -146,14 +165,10 @@ img, y_update = bring_to_bottom(img) # Bringing template to bottom
 
 # Updating the template location
 template_location = location_after_perspective(template_location, rotation_radians)
-pos0, pos1 = template_location
-x0, y0 = pos0
-x1, y1 = pos1
-y0 += y_update
-y1 += y_update
-pos0 = (x0, y0)
-pos1 = (x1, y1)
-template_location = (pos0, pos1)
+template_location = location_after_moving(template_location, 0, y_update)
 img = blend(weird_bg, img)
 draw_bbox(img, template_location, (0, 0, 255))
 save_image(img, path=PATH_DESTINY) # Saving the image
+
+# Printing the location of the template (FOR FUTURE CSV IMPLEMENTATIONS):
+# print(location_tostring(template_location, template_class))

@@ -14,7 +14,7 @@
     },
     "PATHS" : {
         "GROUND_TEXTURE" : "asphalt_textures/asphalt_001.jpg",
-        "TEMPLATE" : "DIREITA",
+        "TEMPLATE" : "RETORNODIREITA",
         "TEMPLATES": "templates",
         "BACKGROUND_IMAGE" : "backgrounds/bg_001.jpg",
         "SAVE_PATH" : "image_001.jpg"
