@@ -126,7 +126,6 @@ img = rotate(img, rotation_radians, 0, 0, 0, 0, 0) # Rotating the image in X
 img, y_update = bring_to_bottom(img) # Bringing template to bottom
 
 # Updating the template location
-# (Don't work as expected yet, it still need to calculate the position change due to the perspective warp)
 template_location = location_after_perspective(template_location, rotation_radians)
 pos0, pos1 = template_location
 x0, y0 = pos0
