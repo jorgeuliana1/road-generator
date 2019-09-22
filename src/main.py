@@ -3,6 +3,7 @@ import numpy as np
 import math
 from road_generator import *
 import json
+import os
 
 IMAGE_COUNT = 0
 
@@ -38,7 +39,8 @@ def get_parameters(settings_path):
     template = json_file["PATHS"]["TEMPLATE"]
     bg = json_file["PATHS"]["BACKGROUND_IMAGE"]
     destiny = json_file["PATHS"]["SAVE_PATH"]
-    paths = {"GROUND" : ground_texture, "TEMPLATE" : template, "BACKGROUND" : bg, "DESTINY" : destiny}
+    templates = json_file["PATHS"]["TEMPLATES"]
+    paths = {"GROUND" : ground_texture, "TEMPLATE" : template, "BACKGROUND" : bg, "DESTINY" : destiny, "TEMPLATES" : templates}
 
     # Getting the rotation:
     x = float(json_file["IMAGE_ROTATION"]["X_ROTATION"])
@@ -76,8 +78,8 @@ def location_after_perspective(location, rotation_radians):
     # Converting to 2D:
     x0, y0, _ = pos0
     x1, y1, _ = pos1
-    x0, y0 = x0 * 1.8 + ref_x, y0 * 1.2 + ref_y # Returning to default coordinates
-    x1, y1 = x1 * 1.8 + ref_x, y1 * 1.2 + ref_y # Returning to default coordinates
+    x0, y0 = x0 * 2.4 + ref_x, y0 * 1.2 + ref_y # Returning to default coordinates
+    x1, y1 = x1 * 2.4 + ref_x, y1 * 1.2 + ref_y # Returning to default coordinates
     pos0 = (int(x0), int(y0))
     pos1 = (int(x1), int(y1))
 
@@ -93,6 +95,20 @@ def draw_bbox(image, location, color):
 
     cv2.rectangle(image, (x0, y0), (x1, y1), color, 2)
 
+def load_templates(path, dimensions, divisions):
+    files = os.listdir(path)
+    templates = {}
+    
+    for filename in files:
+        full_path = path + "/" + filename
+        template_name = filename.split(".")[0]
+
+        template = get_template_from_image(dimensions, divisions, full_path)
+        templates[template_name] = template
+
+    # This function returns a dict containing the templates.
+    return templates
+
 # Testing the code:
 
 # Setting the parameters
@@ -104,13 +120,16 @@ PATH_ASFALTO = PATHS["GROUND"]
 PATH_TEMPLATE = PATHS["TEMPLATE"]
 PATH_WEIRD = PATHS["BACKGROUND"]
 PATH_DESTINY = PATHS["DESTINY"]
+TEMPLATES = PATHS["TEMPLATES"]
 ROTATION_DEGREES, _, _ = ROTATION
+
+templates_dict = load_templates(TEMPLATES, DIMENSIONS, DIVISIONS)
 
 dimensions = (WIDTH, HEIGHT) # Defining the dimensions
 asphalt_bg = get_bg_from_image(dimensions, PATH_ASFALTO) # Defining the bg
 weird_bg = get_bg_from_image(dimensions, PATH_WEIRD) # Defining the weird bg
-sample_template = get_template_from_image(dimensions, DIVISIONS, PATH_TEMPLATE) # Getting the arrow
-templates  = generate_empty_templates_layer(dimensions) # Defining the overlay mask
+sample_template = templates_dict["RETORNODIREITA"] # Just a sample template
+templates = generate_empty_templates_layer(dimensions) # Defining the overlay mask
 
 draw_ways(templates, DIVISIONS, YELLOW, LINE_THICKNESS) # Painting the overlay mask with the way separation marks
 
