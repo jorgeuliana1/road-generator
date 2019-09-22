@@ -65,17 +65,6 @@ def load_templates(path, dimensions, divisions):
     # This function returns a dict containing the templates.
     return templates
 
-def location_tostring(location, template_class):
-    string = ""
-
-    # Getting Xs and Ys:
-    pos0, pos1 = location
-    x0, y0 = pos0
-    x1, y1 = pos1
-
-    string += str(x0) + "," + str(y0) + "," + str(x1) + "," + str(y1) + "," + template_class
-    return string
-
 # Testing the code:
 
 # Setting the parameters
@@ -116,7 +105,8 @@ img, y_update = bring_to_bottom(img) # Bringing template to bottom
 mt = MarkTracker(PATH_DESTINY)
 mt.addLocation(template_location, PATH_TEMPLATE)
 mt.update(0, y_update, rotation_radians)
-template_location = mt.getLocation(0)
+
+# Finishing the image
 img = blend(weird_bg, img)
 draw_bbox(img, mt.getLocation(0), (0, 0, 255))
 save_image(img, path=PATH_DESTINY) # Saving the image
