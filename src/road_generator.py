@@ -15,7 +15,7 @@ def draw_straight_line(image, pos1, pos2, color, thickness):
     # Applying thickness:
     x1 -= thickness
     x2 += thickness
-    
+
     # Rectangle starting at:
     origin = (x1, y1)
 
@@ -104,7 +104,7 @@ def get_template_from_image(dimensions, divisions, image_path):
     unchanged_template = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
     th, tw, ta = unchanged_template.shape # Original template dimensions
     w, h = dimensions # Background dimensions
-    
+
     # Getting the image ratio
     smaller = th
     bigger  = tw
@@ -155,18 +155,18 @@ def rotate(image, theta, phi, gamma, dx, dy, dz):
                    [0,    1, -h/2],
                    [0,    0,    1],
                    [0,    0,    1]])
-    
+
     # Rotating X, Y and Z
     RX = np.array([[1, 0, 0, 0],
                    [0, np.cos(theta), -np.sin(theta), 0],
                    [0, np.sin(theta), np.cos(theta), 0],
                    [0, 0, 0, 1]])
-        
+
     RY = np.array([[np.cos(phi), 0, -np.sin(phi), 0],
                    [0, 1, 0, 0],
                    [np.sin(phi), 0, np.cos(phi), 0],
                    [0, 0, 0, 1]])
-    
+
     RZ = np.array([[np.cos(gamma), -np.sin(gamma), 0, 0],
                    [np.sin(gamma), np.cos(gamma), 0, 0],
                    [0, 0, 1, 0],
@@ -222,3 +222,11 @@ def bring_to_bottom(image):
     new_image[:][counter:h] = image[:][0:h-counter]
 
     return new_image, counter
+
+def draw_bbox(image, location, color):
+    # Getting Xs and Ys:
+    pos0, pos1 = location
+    x0, y0 = pos0
+    x1, y1 = pos1
+
+    cv2.rectangle(image, (x0, y0), (x1, y1), color, 2)

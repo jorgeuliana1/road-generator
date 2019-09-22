@@ -4,6 +4,7 @@ import math
 from road_generator import *
 import json
 import os
+from mark_tracker import MarkTracker
 
 IMAGE_COUNT = 0
 
@@ -50,62 +51,10 @@ def get_parameters(settings_path):
 
     return dimensions, road, paths, rotation
 
-def location_after_perspective(location, rotation_radians):
-    # Getting Xs and Ys:
-    pos0, pos1 = location
-    x0, y0 = pos0
-    x1, y1 = pos1
-
-    # Putting points in cartesian coordinates
-    ref_x = (x0 + x1) / 2
-    ref_y = (y0 + y1) / 2
-    x0, x1 = x0 - ref_x, x1 - ref_x
-    y0, y1 = y0 - ref_y, y1 - ref_y
-
-    # Converting to 3D points
-    # pos0 = (x0, y0, 0)
-    # pos1 = (x1, y1, 0)
-    # The rotation must follow the rule:
-    # z ** 2 + y ** 2 = y0 ** 2
-    # Thus:
-    # z = y0*cos(radians)
-    # y = y0*sin(radians)
-
-    # Doing the rotation:
-    pos0 = (x0, y0*math.cos(rotation_radians), y0*math.sin(rotation_radians))
-    pos1 = (x1, y1*math.cos(rotation_radians), y1*math.sin(rotation_radians))
-
-    # Converting to 2D:
-    x0, y0, _ = pos0
-    x1, y1, _ = pos1
-    x0, y0 = x0 * 2.4 + ref_x, y0 * 1.2 + ref_y # Returning to default coordinates
-    x1, y1 = x1 * 2.4 + ref_x, y1 * 1.2 + ref_y # Returning to default coordinates
-    pos0 = (int(x0), int(y0))
-    pos1 = (int(x1), int(y1))
-
-    new_location = (pos0, pos1)
-    
-    return new_location
-
-def location_after_moving(location, x_movement, y_movement):
-    pos0, pos1 = location
-    x0, y0 = pos0
-    x1, y1 = pos1
-
-    return ((x0 + x_movement, y0 + y_movement), (x1 + x_movement, y0 + y_movement))
-
-def draw_bbox(image, location, color):
-    # Getting Xs and Ys:
-    pos0, pos1 = location
-    x0, y0 = pos0
-    x1, y1 = pos1
-
-    cv2.rectangle(image, (x0, y0), (x1, y1), color, 2)
-
 def load_templates(path, dimensions, divisions):
     files = os.listdir(path)
     templates = {}
-    
+
     for filename in files:
         full_path = path + "/" + filename
         template_name = filename.split(".")[0]
@@ -118,7 +67,7 @@ def load_templates(path, dimensions, divisions):
 
 def location_tostring(location, template_class):
     string = ""
-    
+
     # Getting Xs and Ys:
     pos0, pos1 = location
     x0, y0 = pos0
@@ -164,11 +113,13 @@ img = rotate(img, rotation_radians, 0, 0, 0, 0, 0) # Rotating the image in X
 img, y_update = bring_to_bottom(img) # Bringing template to bottom
 
 # Updating the template location
-template_location = location_after_perspective(template_location, rotation_radians)
-template_location = location_after_moving(template_location, 0, y_update)
+mt = MarkTracker(PATH_DESTINY)
+mt.addLocation(template_location, PATH_TEMPLATE)
+mt.update(0, y_update, rotation_radians)
+template_location = mt.getLocation(0)
 img = blend(weird_bg, img)
-draw_bbox(img, template_location, (0, 0, 255))
+draw_bbox(img, mt.getLocation(0), (0, 0, 255))
 save_image(img, path=PATH_DESTINY) # Saving the image
 
 # Printing the location of the template (FOR FUTURE CSV IMPLEMENTATIONS):
-# print(location_tostring(template_location, template_class))
+# print(mt.getLocationString(0)+","+mt.getFilename())
