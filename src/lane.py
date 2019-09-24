@@ -40,7 +40,9 @@ class Lane:
         y0, y1 = math.floor(yc - t_h/2.00), math.ceil(yc + t_h/2.00)
 
         # Inserting the image:
-        layer[y0:y1, x0:x1] = template
+        new_layer = layer.copy()
+        new_layer[y0:y1, x0:x1] = template
 
         # Returning template location:
-        return ((x0, y0), (x1, y1))
+        return new_layer, ((x0, y0), (x1, y1))
+    
