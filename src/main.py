@@ -5,6 +5,7 @@ from road_generator import *
 import json
 import os
 from mark_tracker import MarkTracker
+from road import Road
 
 IMAGE_COUNT = 0
 
@@ -88,10 +89,14 @@ template_class = PATH_TEMPLATE
 sample_template = templates_dict[template_class] # Just a sample template
 templates = generate_empty_templates_layer(dimensions) # Defining the overlay mask
 
-draw_ways(templates, DIVISIONS, YELLOW, LINE_THICKNESS) # Painting the overlay mask with the way separation marks
-
 # Painting the overlay mask with the arrow:
-template_location = insert_template(templates, DIVISIONS, math.floor(DIVISIONS/2), sample_template)
+r = Road(WIDTH, HEIGHT)
+lane_width = math.floor(WIDTH/DIVISIONS)
+for i in range(DIVISIONS):
+    r.newLane(lane_width)
+    if i > 0:
+        templates = r.drawSeparator(i - 1, templates)
+templates, template_location = r.insertTemplateAtLane(templates, sample_template, math.floor(DIVISIONS/2))
 
 # Joining all the layers
 img = blend(asphalt_bg, templates)
