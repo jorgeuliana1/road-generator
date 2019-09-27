@@ -53,7 +53,7 @@ class RoadImage:
     
     def randomMark(self): # Returns a random template name
         templates_names = tuple(self.templates.keys())
-        random_key = templates_names[random.randint(0,len(templates_names))]
+        random_key = templates_names[random.randint(0,len(templates_names) - 1)]
         return random_key
 
     def getRotation(self, minx, maxx, miny, maxy, minz, maxz):

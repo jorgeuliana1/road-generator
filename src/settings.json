@@ -9,9 +9,6 @@
         "VARIATION" : 20
     },
     "IMAGE_ROTATION" : {
-        "X_ROTATION" : -60,
-        "Y_ROTATION" : 0,
-        "Z_ROTATION" : 0,
         "MAX_X" : -30,
         "MIN_X" : -80,
         "MAX_Y" : 0,
@@ -31,5 +28,5 @@
         "MAX_Y" : 0,
         "MIN_Y" : -0
     },
-    "SEED" : 0
+    "SEED" : 123
 }
