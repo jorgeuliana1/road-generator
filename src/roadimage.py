@@ -70,3 +70,7 @@ class RoadImage:
 
         # Returning rotations:
         return (x, y, z)
+
+    def getRandomLane(self):
+        lanes = len(self.road.lanes)
+        return random.randint(0, lanes-1)
