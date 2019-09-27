@@ -1,12 +1,12 @@
 import cv2
 import numpy as np
 import math
-from road_generator import *
 import json
 import os
 from mark_tracker import MarkTracker
 from road import Road
 from roadimage import RoadImage
+from roadgraphics import *
 
 IMAGE_COUNT = 0
 
@@ -40,11 +40,10 @@ def get_parameters(settings_path):
 
     # Getting the files paths:
     ground_texture = json_file["PATHS"]["GROUND_TEXTURE"]
-    template = json_file["PATHS"]["TEMPLATE"]
     bg = json_file["PATHS"]["BACKGROUND_IMAGE"]
     destiny = json_file["PATHS"]["SAVE_PATH"]
     templates = json_file["PATHS"]["TEMPLATES"]
-    paths = {"GROUND" : ground_texture, "TEMPLATE" : template, "BACKGROUND" : bg, "DESTINY" : destiny, "TEMPLATES" : templates}
+    paths = {"GROUND" : ground_texture, "BACKGROUND" : bg, "DESTINY" : destiny, "TEMPLATES" : templates}
 
     # Getting the rotation:
     x = float(json_file["IMAGE_ROTATION"]["X_ROTATION"])
@@ -73,6 +72,11 @@ def load_templates(path, dimensions, divisions):
 
 # Testing the code:
 
+# Opening the JSON file:
+settings_path = "settings.json" # To change later
+with open(settings_path, 'r') as f:
+    json_file = json.load(f)
+
 # Setting the parameters
 DIMENSIONS, ROAD, PATHS, ROTATION, SEED = get_parameters("settings.json")
 WIDTH, HEIGHT = DIMENSIONS
@@ -80,7 +84,6 @@ DIVISIONS = ROAD["DIVISIONS"]
 LINE_THICKNESS = ROAD["THICKNESS"]
 ROAD_VARIATION = ROAD["VARIATION"]
 PATH_ASFALTO = PATHS["GROUND"]
-PATH_TEMPLATE = PATHS["TEMPLATE"]
 PATH_WEIRD = PATHS["BACKGROUND"]
 PATH_DESTINY = PATHS["DESTINY"]
 TEMPLATES = PATHS["TEMPLATES"]
@@ -91,31 +94,38 @@ templates_dict = load_templates(TEMPLATES, DIMENSIONS, DIVISIONS)
 dimensions = (WIDTH, HEIGHT) # Defining the dimensions
 asphalt_bg = get_bg_from_image(dimensions, PATH_ASFALTO) # Defining the bg
 weird_bg = get_bg_from_image(dimensions, PATH_WEIRD) # Defining the weird bg
-template_class = PATH_TEMPLATE
-sample_template = templates_dict[template_class] # Just a sample template
 templates = generate_empty_templates_layer(dimensions) # Defining the overlay mask
 
 # Painting the overlay mask with the arrow:
-ri = RoadImage(dimensions, PATH_DESTINY, 0, 0, 0) # Will change in the future
+ri = RoadImage(dimensions, PATH_DESTINY, 0, 0, templates_dict) # Will change in the future
 ri.setSeed(SEED)
 ri.defineLanes(DIVISIONS, ROAD_VARIATION)
 r = ri.getRoad()
 for i in range(1, DIVISIONS):
     if i > 0:
         templates = r.drawSeparator(i - 1, templates)
+
+# Inserting random template:
+template_class = ri.randomMark()
+sample_template = templates_dict[template_class]
 templates, template_location = r.insertTemplateAtLane(templates, sample_template, math.floor(DIVISIONS/2))
 
 # Joining all the layers
 img = blend(asphalt_bg, templates)
 
-# Warping perspective
-rotation_radians = ROTATION_DEGREES/180.00 * math.pi
+# Getting the image rotation angles:
+img_rotation = json_file["IMAGE_ROTATION"]
+minx, maxx = img_rotation["MIN_X"], img_rotation["MAX_X"]
+miny, maxy = img_rotation["MIN_Y"], img_rotation["MAX_Y"]
+minz, maxz = img_rotation["MIN_Z"], img_rotation["MAX_Z"]
+rotation_radians, _, _ = ri.getRotation(minx, maxx, miny, maxy, minz, maxz)
+
 img = rotate(img, rotation_radians, 0, 0, 0, 0, 0) # Rotating the image in X
 img, y_update = bring_to_bottom(img) # Bringing template to bottom
 
 # Updating the template location
 mt = MarkTracker(PATH_DESTINY)
-mt.addLocation(template_location, PATH_TEMPLATE)
+mt.addLocation(template_location, template_class)
 mt.update(0, y_update, rotation_radians)
 
 # Finishing the image

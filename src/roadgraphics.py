@@ -2,65 +2,6 @@ import numpy as np
 import math
 import cv2
 
-def get_block_dimensions(image, divisions):
-    h, w, alpha = image.shape
-    block_w = math.floor(w/divisions)
-    block_h = h
-    return block_w, block_h
-
-def draw_straight_line(image, pos1, pos2, color, thickness):
-    x1, y1 = pos1
-    x2, y2 = pos2
-
-    # Applying thickness:
-    x1 -= thickness
-    x2 += thickness
-
-    # Rectangle starting at:
-    origin = (x1, y1)
-
-    # Rectangle ending at:
-    destiny = (x2, y2)
-
-    # Getting image dimensions:
-    h, w, _ = image.shape
-
-    # Creating the line overlayer:
-    overlay = np.zeros([h, w, 3], dtype=np.uint8)
-
-    # Defining the alpha channel
-    blue, green, red = cv2.split(overlay)
-    alpha = np.zeros(blue.shape, dtype=blue.dtype)
-    overlay = cv2.merge((blue, green, red, alpha))
-
-    # Creating a pixel of the specified color
-    r, g, b = color
-    pixel = np.zeros([1, 1, 3], dtype=np.uint8)
-    blue, green, red = cv2.split(pixel)
-    alpha = np.ones(blue.shape, dtype=blue.dtype) * 255
-    blue.fill(b)
-    red.fill(r)
-    green.fill(g)
-    pixel = cv2.merge((blue, green, red, alpha))
-
-    # "Painting" the image
-    for i in range(x1, x2):
-        for j in range(y1, y2):
-            overlay[j][i] = pixel
-
-    image+=overlay
-
-def draw_ways(image, divisions, color, thickness):
-    # Setting the block dimensions:
-    block_w, block_h = get_block_dimensions(image, divisions)
-
-    # Inserting the lines at the overlay
-    for i in range(1, divisions):
-        pos1 = (block_w * i, 0)          # Beggining of the line
-        pos2 = (block_w * i, block_h)    # End of the line
-
-        draw_straight_line(image, pos1, pos2, color, thickness)
-
 def insert_template(image, divisions, block_to_add, template):
     # Finding the block limits
     image_h, image_w, image_c = image.shape
