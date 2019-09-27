@@ -6,6 +6,7 @@ import json
 import os
 from mark_tracker import MarkTracker
 from road import Road
+from roadimage import RoadImage
 
 IMAGE_COUNT = 0
 
@@ -34,7 +35,8 @@ def get_parameters(settings_path):
     # Getting the road settings:
     divisions = int(json_file["ROAD_SETTINGS"]["DIVISIONS"])
     line_thickness = int(json_file["ROAD_SETTINGS"]["LINE_THICKNESS"])
-    road = {"DIVISIONS" : divisions, "THICKNESS" : line_thickness}
+    road_variation = int(json_file["ROAD_SETTINGS"]["VARIATION"])
+    road = {"DIVISIONS" : divisions, "THICKNESS" : line_thickness, "VARIATION" : road_variation}
 
     # Getting the files paths:
     ground_texture = json_file["PATHS"]["GROUND_TEXTURE"]
@@ -50,7 +52,10 @@ def get_parameters(settings_path):
     z = float(json_file["IMAGE_ROTATION"]["Z_ROTATION"])
     rotation = (x, y, z)
 
-    return dimensions, road, paths, rotation
+    # Getting the seed:
+    seed = int(json_file["SEED"])
+
+    return dimensions, road, paths, rotation, seed
 
 def load_templates(path, dimensions, divisions):
     files = os.listdir(path)
@@ -69,10 +74,11 @@ def load_templates(path, dimensions, divisions):
 # Testing the code:
 
 # Setting the parameters
-DIMENSIONS, ROAD, PATHS, ROTATION = get_parameters("settings.json")
+DIMENSIONS, ROAD, PATHS, ROTATION, SEED = get_parameters("settings.json")
 WIDTH, HEIGHT = DIMENSIONS
 DIVISIONS = ROAD["DIVISIONS"]
 LINE_THICKNESS = ROAD["THICKNESS"]
+ROAD_VARIATION = ROAD["VARIATION"]
 PATH_ASFALTO = PATHS["GROUND"]
 PATH_TEMPLATE = PATHS["TEMPLATE"]
 PATH_WEIRD = PATHS["BACKGROUND"]
@@ -90,10 +96,11 @@ sample_template = templates_dict[template_class] # Just a sample template
 templates = generate_empty_templates_layer(dimensions) # Defining the overlay mask
 
 # Painting the overlay mask with the arrow:
-r = Road(WIDTH, HEIGHT)
-lane_width = math.floor(WIDTH/DIVISIONS)
-for i in range(DIVISIONS):
-    r.newLane(lane_width)
+ri = RoadImage(dimensions, PATH_DESTINY, 0, 0, 0) # Will change in the future
+ri.setSeed(SEED)
+ri.defineLanes(DIVISIONS, ROAD_VARIATION)
+r = ri.getRoad()
+for i in range(1, DIVISIONS):
     if i > 0:
         templates = r.drawSeparator(i - 1, templates)
 templates, template_location = r.insertTemplateAtLane(templates, sample_template, math.floor(DIVISIONS/2))

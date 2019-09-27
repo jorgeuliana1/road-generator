@@ -24,7 +24,7 @@ class Lane:
             xa, ya = math.floor(xa), math.floor(ya)
 
         return xa, ya
-    def insertTemplate(self, layer, template, x, y):
+    def insertTemplate(self, layer, template, x, y, even=True):
         # x and y are the coordinates of the center of the template
         
         # Getting template dimensions:
@@ -32,7 +32,10 @@ class Lane:
 
         # Getting lane x and y:
         xc, yc = self.getAbsoluteCoordinates(x, y)
-        xc = xc - self.w/2 # Adjusting Xc position
+
+        # Adjusting Xc position:
+        if even:
+            xc = xc - self.w/2
 
         # Finding the template insertion vertexes:
         x0, x1 = math.floor(xc - t_w/2.00), math.floor(xc + t_w/2.00)

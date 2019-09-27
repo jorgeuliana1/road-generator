@@ -20,7 +20,13 @@ class Road:
         self.lanes.append(new_lane)
     def insertTemplateAtLane(self, layer, template, lane_index, x=0, y=0):
         lane = self.lanes[lane_index]
-        return lane.insertTemplate(layer, template, x, y)
+        
+        # Defining if the number of lanes is even:
+        even = False
+        if len(self.lanes) % 2 == 0:
+            even = True
+
+        return lane.insertTemplate(layer, template, x, y, even=even)
     def drawSeparator(self, index, layer, width=3, color=(255, 255, 255), dotted=False, dot_size=3, dot_distance=1, x_dist=0):
         if len(self.lanes) <= index+1:
             return layer
