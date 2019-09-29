@@ -33,12 +33,25 @@ class Lane:
         # Getting lane x and y:
         xc, yc = self.getAbsoluteCoordinates(x, y)
 
-        # Adjusting Xc position:
-        #xc = xc - self.w/2
-
         # Finding the template insertion vertexes:
         x0, x1 = math.floor(xc - t_w/2.00), math.floor(xc + t_w/2.00)
         y0, y1 = math.floor(yc - t_h/2.00), math.floor(yc + t_h/2.00)
+
+        # Adding the shift:
+        y0 += y
+        y1 += y
+        x0 += x
+        x1 += x
+
+        # Correcting shift:
+        if x1 > self.x0 + self.w:
+            x1 = self.x0 + self.w
+        if x0 < self.x0:
+            x0 = self.x0
+        if y1 > self.h:
+            y1 = self.h
+        if y0 < 0:
+            y0 = 0
 
         # Inserting the image:
         new_layer = layer.copy()

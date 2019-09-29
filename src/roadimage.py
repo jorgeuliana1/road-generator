@@ -19,6 +19,8 @@ class RoadImage:
 
         # Defining the dictionaries containing random images
         self.templates = templates
+        self.backgrounds = background_images
+        self.grounds = asphalt_textures
 
         random.seed(seed)
 
@@ -56,6 +58,16 @@ class RoadImage:
         random_key = templates_names[random.randint(0,len(templates_names) - 1)]
         return random_key
 
+    def randomBackground(self): # Returns a random background name
+        background_names = tuple(self.backgrounds.keys())
+        random_key = background_names[random.randint(0,len(background_names) - 1)]
+        return random_key
+
+    def randomGround(self):
+        ground_names = tuple(self.grounds.keys())
+        random_key = ground_names[random.randint(0,len(ground_names) - 1)]
+        return random_key
+
     def getRotation(self, minx, maxx, miny, maxy, minz, maxz):
 
         # Getting rotations, in deegrees
@@ -70,6 +82,13 @@ class RoadImage:
 
         # Returning rotations:
         return (x, y, z)
+    
+    def getShift(self, minx, maxx, miny, maxy):
+        # Getting shifts, in pixels
+        x = random.randint(minx, maxx)
+        y = random.randint(miny, maxy)
+
+        return (x, y)        
 
     def getRandomLane(self):
         lanes = len(self.road.lanes)

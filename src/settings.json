@@ -17,16 +17,16 @@
         "MIN_Z" : 0
     },
     "PATHS" : {
-        "GROUND_TEXTURE" : "asphalt_textures/asphalt_001.jpg",
+        "GROUND_TEXTURES" : "asphalt_textures",
         "TEMPLATES": "templates",
-        "BACKGROUND_IMAGE" : "backgrounds/bg_001.jpg",
+        "BACKGROUND_IMAGES" : "backgrounds",
         "SAVE_PATH" : "image_000.jpg"
     },
     "MARKPOS_VARIATION" : {
-        "MAX_X" : 0,
-        "MIN_X" : -0,
-        "MAX_Y" : 0,
-        "MIN_Y" : -0
+        "MAX_X" : 20,
+        "MIN_X" : -20,
+        "MAX_Y" : 20,
+        "MIN_Y" : -20
     },
     "SEED" : 0
 }

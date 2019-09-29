@@ -82,6 +82,9 @@ class MarkTracker:
     def getLocation(self, index):
         loc = self.locations[index]
         pos, _ = loc
-        return pos
+        loc0, loc1 = pos
+        x0, y0 = loc0
+        x1, y1 = loc1
+        return ((int(x0), int(y0)), (int(x1), int(y1)))
     def getFilename(self):
         return self.filename

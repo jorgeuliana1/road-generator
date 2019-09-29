@@ -30,6 +30,20 @@ def load_templates(path, dimensions, divisions):
     # This function returns a dict containing the templates.
     return templates
 
+def load_backgrounds(path, dimensions):
+    files = os.listdir(path)
+    backgrounds = {}
+
+    for filename in files:
+        full_path = path + "/" + filename
+        background_name = filename.split(".")[0]
+
+        background = get_bg_from_image(dimensions, full_path)
+        backgrounds[background_name] = background
+    
+    # Can be used for ground textures and backgrounds
+    return backgrounds
+
 def main():
     # Defining colors:
     RED   =  (  0,   0, 255)
@@ -57,27 +71,23 @@ def main():
     MIN_Z, MAX_Z = IMAGE_ROTATION["MIN_Z"], IMAGE_ROTATION["MAX_Z"]
 
     PATHS = json_file["PATHS"]
-    GROUND_TEXTURE = PATHS["GROUND_TEXTURE"]
+    GROUND_TEXTURES = PATHS["GROUND_TEXTURES"]
     TEMPLATES = PATHS["TEMPLATES"]
-    BACKGROUNDS = PATHS["BACKGROUND_IMAGE"]
+    BACKGROUNDS = PATHS["BACKGROUND_IMAGES"]
     DESTINY = PATHS["SAVE_PATH"]
 
-    # TODO: Add MARK_POS variation here
+    POS = json_file["MARKPOS_VARIATION"]
+    MINCX, MAXCX = POS["MIN_X"], POS["MAX_X"]
+    MINCY, MAXCY = POS["MIN_Y"], POS["MAX_Y"]
 
     SEED = json_file["SEED"]
 
     # Loading the roadmarks templates:
     templates = load_templates(TEMPLATES, (WIDTH, HEIGHT), ROAD_LANES)
-    # TODO: Load ground textures folder
-    ground_textures = 0 # Must change
-    # TODO: Load background images folder
-    backgrounds = 0 # Must change
-
-    # Loading specific ground texture file:
-    ground_texture = get_bg_from_image((WIDTH, HEIGHT), GROUND_TEXTURE)
-
-    # Loading specific background image file:
-    bg_img = get_bg_from_image((WIDTH, HEIGHT), BACKGROUNDS)
+    # Loading ground textures:
+    ground_textures = load_backgrounds(GROUND_TEXTURES, (WIDTH, HEIGHT))
+    # Loading the backgrounds:
+    backgrounds = load_backgrounds(BACKGROUNDS, (WIDTH, HEIGHT))
 
     # Generating the templates layer:
     overlay = generate_empty_templates_layer((WIDTH, HEIGHT))
@@ -94,12 +104,22 @@ def main():
     for i in range(1, ROAD_LANES):
         if i > 0:
             overlay = road.drawSeparator(i - 1, overlay)
+
+    # Getting random background:
+    background_filename = img.randomBackground()
+    bg_img = backgrounds[background_filename]
+
+    # Getting random ground texture:
+    ground_texture_filename = img.randomGround()
+    ground_texture = ground_textures[ground_texture_filename]
     
     # Inserting random template:
     template_class = img.randomMark()
     sample_template = templates[template_class]
     lane_index = img.getRandomLane()
-    overlay, template_location = road.insertTemplateAtLane(overlay, sample_template, lane_index)
+    x_offset, y_offset = img.getShift(MINCX, MAXCX, MINCY, MAXCY)
+    overlay, template_location = road.insertTemplateAtLane(overlay,
+                                sample_template, lane_index, x=x_offset, y=y_offset)
 
     # Blending layers:
     output_img = blend(ground_texture, overlay)
@@ -107,13 +127,13 @@ def main():
     # Rotating image:
     r_x, r_y, r_z = img.getRotation(MIN_X, MAX_X, MIN_Y, MAX_Y, MIN_Z, MAX_Z)
     output_img = rotate(output_img, r_x, r_y, r_z, 0, 0, 0) # Must change later
-    output_img, y_offset = bring_to_bottom(output_img)
-    x_offset = 0 # Must change later
+    output_img, y_shift = bring_to_bottom(output_img)
+    x_shift = 0
 
     # Getting the template location
     tracker = MarkTracker(DESTINY)
     tracker.addLocation(template_location, template_class)
-    tracker.update(x_offset, y_offset, r_x)
+    tracker.update(x_shift, y_shift, r_x)
 
     # Final blending:
     output_img = blend(bg_img, output_img)
