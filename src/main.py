@@ -80,6 +80,12 @@ def main():
     MINCX, MAXCX = POS["MIN_X"], POS["MAX_X"]
     MINCY, MAXCY = POS["MIN_Y"], POS["MAX_Y"]
 
+    SEP = json_file["SEP_SETTINGS"]
+    MINS_WID, MAXS_WID = SEP["MIN_WID"], SEP["MAX_WID"]
+    MIND_SIZ, MAXD_SIZ = SEP["MIN_DOT_SIZ"], SEP["MAX_DOT_SIZ"]
+    MIND_DIS, MAXD_DIS = SEP["MIN_DOT_DIS"], SEP["MAX_DOT_DIS"]
+    MIN_XDIS, MAX_XDIS = SEP["MIN_XDIST"], SEP["MAX_XDIST"]
+
     SEED = json_file["SEED"]
 
     # Loading the roadmarks templates:
@@ -99,11 +105,15 @@ def main():
     # Defining the lanes in the road
     img.defineLanes(ROAD_LANES, LANE_VARIATION)
 
+    # Defining the separators:
+    separator_settings = img.getRandomSeparator(MINS_WID, MAXS_WID, MIND_SIZ, MAXD_SIZ,
+                                                MIND_SIZ, MAXD_SIZ, MIN_XDIS, MAX_XDIS)
+
     road = img.getRoad()
     # Inserting the lanes divisions in the road:
     for i in range(1, ROAD_LANES):
         if i > 0:
-            overlay = road.drawSeparator(i - 1, overlay)
+            overlay = road.drawSeparatorByTuple(i - 1, overlay, separator_settings)
 
     # Getting random background:
     background_filename = img.randomBackground()
@@ -139,7 +149,9 @@ def main():
     output_img = blend(bg_img, output_img)
 
     # Drawing bounding box around the template:
-    draw_bbox(output_img, tracker.getLocation(0), RED) # Must change later
+    # draw_bbox(output_img, tracker.getLocation(0), RED) # Must change later
+
+    # TODO: FIX THE TRACKER
 
     # Saving image:
     save_image(output_img, path=DESTINY)

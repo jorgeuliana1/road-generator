@@ -8,6 +8,16 @@
         "LINE_THICKNESS" : 3,
         "VARIATION" : 20
     },
+    "SEP_SETTINGS" : {
+        "MIN_WID" : 2,
+        "MAX_WID" : 5,
+        "MIN_DOT_SIZ" : 20,
+        "MAX_DOT_SIZ" : 50,
+        "MIN_DOT_DIS" : 0,
+        "MAX_DOT_DIS" : 10,
+        "MIN_XDIST" : 0,
+        "MAX_XDIST" : 3
+    },
     "IMAGE_ROTATION" : {
         "MAX_X" : -30,
         "MIN_X" : -80,

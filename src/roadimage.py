@@ -93,3 +93,32 @@ class RoadImage:
     def getRandomLane(self):
         lanes = len(self.road.lanes)
         return random.randint(0, lanes-1)
+
+    def getRandomSeparator(self, minwidth, maxwidth, mindotsize, maxdotsize, mindotdist, maxdotdist, minxdist, maxxdist):
+
+        # Defining colors:
+        colors = [
+                    (255, 255, 255), # WHITE
+                    (255, 255,   0), # YELLOW
+                    (128, 128,   0)  # DARK YELLOW
+                 ]
+        
+        # Getting random color:
+        color = colors[random.randint(0,len(colors)-1)]
+
+        # Getting random dot_size:
+        dot_size = random.randint(mindotsize, maxdotsize)
+
+        # Getting random dot_dist:
+        dot_dist = random.randint(mindotdist, maxdotdist)
+
+        # Getting random x_dist:
+        x_dist = random.randint(minxdist, maxxdist)
+
+        # Getting random width:
+        width = random.randint(minwidth, maxwidth)
+
+        # Getting random true or false:
+        is_true = bool(random.getrandbits(1))
+
+        return (width, color, is_true, dot_size, dot_dist, x_dist)

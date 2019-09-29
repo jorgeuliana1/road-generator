@@ -36,3 +36,8 @@ class Road:
         new_layer = lane2.drawLeftSeparator(new_layer, width=width, color=color, dotted=dotted, dot_size=dot_size, dot_distance=dot_distance, x_dist=x_dist)
 
         return new_layer
+
+    def drawSeparatorByTuple(self, index, layer, settings):
+        width, color, dotted, dot_size, dot_distance, x_dist = settings
+        return self.drawSeparator(index, layer, width=width, color=color, dotted=dotted,
+                            dot_size=dot_size, dot_distance=dot_distance, x_dist=x_dist)
