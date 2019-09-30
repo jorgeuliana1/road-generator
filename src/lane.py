@@ -25,10 +25,28 @@ class Lane:
 
         return xa, ya
     def insertTemplate(self, layer, template, x, y):
-        # x and y are the coordinates of the center of the template
+        # x and y are the coordinates related to the center of the template
         
         # Getting template dimensions:
         t_h, t_w, _ = template.shape
+
+        # Fixing template dimensions, if necessary:
+        if t_h > self.h or t_w > self.w:
+
+            # Selecting the biggest size
+            if t_h > t_w:
+                biggest = t_h
+                ratio = self.h / biggest
+            else:
+                biggest = t_w
+                ratio = self.w / biggest
+
+            # Changing dimensions
+            t_h, t_w = int(t_h * ratio), int(t_w * ratio)
+
+            # Resizing template
+            new_template = cv2.resize(template, (t_w, t_h))
+            template = new_template
 
         # Getting lane x and y:
         xc, yc = self.getAbsoluteCoordinates(x, y)
@@ -43,15 +61,19 @@ class Lane:
         x0 += x
         x1 += x
 
-        # Correcting shift:
+        # Correcting shift (if necessary):
         if x1 > self.x0 + self.w:
             x1 = self.x0 + self.w
+            x0 = x1 - t_w
         if x0 < self.x0:
             x0 = self.x0
+            x1 = x0 + t_w
         if y1 > self.h:
             y1 = self.h
+            y0 = y1 - t_h
         if y0 < 0:
             y0 = 0
+            y1 = t_h
 
         # Inserting the image:
         new_layer = layer.copy()
