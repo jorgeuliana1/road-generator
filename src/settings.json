@@ -30,7 +30,9 @@
         "GROUND_TEXTURES" : "asphalt_textures",
         "TEMPLATES": "templates",
         "BACKGROUND_IMAGES" : "backgrounds",
-        "SAVE_PATH" : "image_000.jpg"
+        "DESTINY_FOLDER" : "generated_dataset",
+        "FILENAME_PATTERN" : "image_",
+        "FILENAME_EXTENSION" : ".jpg"
     },
     "MARKPOS_VARIATION" : {
         "MAX_X" : 20,
@@ -38,5 +40,6 @@
         "MAX_Y" : 20,
         "MIN_Y" : -20
     },
-    "SEED" : 0
+    "SEED" : 0,
+    "IMAGES" : 11
 }
