@@ -4,7 +4,10 @@
         "HEIGHT" : 320
     },
     "ROAD_SETTINGS" : {
-        "DIVISIONS" : 3,
+        "DIVISIONS" : {
+            "MAX" : 5,
+            "MIN" : 1
+        },
         "LINE_THICKNESS" : 3,
         "VARIATION" : 20
     },
@@ -25,6 +28,12 @@
         "MIN_Y" : 0,
         "MAX_Z" : 0,
         "MIN_Z" : 0
+    },
+    "TEMPLATE_RESIZE" : {
+        "MAX_H" : 20,
+        "MIN_H" : -20,
+        "MAX_W" : 20,
+        "MIN_W" : -20
     },
     "PATHS" : {
         "GROUND_TEXTURES" : "asphalt_textures",

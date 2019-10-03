@@ -16,7 +16,7 @@ def show_image(image):
 def save_image(image, title="", path="image.jpg"):
     cv2.imwrite(title+path, image)
 
-def load_templates(path, dimensions, divisions):
+def load_templates(path, dimensions):
     files = os.listdir(path)
     templates = {}
 
@@ -24,7 +24,7 @@ def load_templates(path, dimensions, divisions):
         full_path = path + "/" + filename
         template_name = filename.split(".")[0]
 
-        template = get_template_from_image(dimensions, divisions, full_path)
+        template = get_template_from_image(dimensions, full_path)
         templates[template_name] = template
 
     # This function returns a dict containing the templates.
@@ -83,7 +83,8 @@ def main():
     WIDTH = json_file["IMAGE_DIMENSIONS"]["WIDTH"]
     HEIGHT = json_file["IMAGE_DIMENSIONS"]["HEIGHT"]
 
-    ROAD_LANES = json_file["ROAD_SETTINGS"]["DIVISIONS"]
+    MAX_LANES = json_file["ROAD_SETTINGS"]["DIVISIONS"]["MAX"]
+    MIN_LANES = json_file["ROAD_SETTINGS"]["DIVISIONS"]["MIN"]
     LINE_THICKNESS = json_file["ROAD_SETTINGS"]["LINE_THICKNESS"]
     LANE_VARIATION = json_file["ROAD_SETTINGS"]["VARIATION"]
 
@@ -91,6 +92,12 @@ def main():
     MIN_X, MAX_X = IMAGE_ROTATION["MIN_X"], IMAGE_ROTATION["MAX_X"]
     MIN_Y, MAX_Y = IMAGE_ROTATION["MIN_Y"], IMAGE_ROTATION["MAX_Y"]
     MIN_Z, MAX_Z = IMAGE_ROTATION["MIN_Z"], IMAGE_ROTATION["MAX_Z"]
+
+    TEMPLATE_RESIZE = json_file["TEMPLATE_RESIZE"]
+    TR_MAXH = TEMPLATE_RESIZE["MAX_H"]
+    TR_MINH = TEMPLATE_RESIZE["MIN_H"]
+    TR_MAXW = TEMPLATE_RESIZE["MAX_W"]
+    TR_MINW = TEMPLATE_RESIZE["MIN_W"]
 
     PATHS = json_file["PATHS"]
     GROUND_TEXTURES = PATHS["GROUND_TEXTURES"]
@@ -116,7 +123,7 @@ def main():
     images_counter = 0 # To generate filename
 
     # Loading the roadmarks templates:
-    templates = load_templates(TEMPLATES, (WIDTH, HEIGHT), ROAD_LANES)
+    templates = load_templates(TEMPLATES, (WIDTH, HEIGHT))
     # Loading ground textures:
     ground_textures = load_backgrounds(GROUND_TEXTURES, (WIDTH, HEIGHT))
     # Loading the backgrounds:
@@ -134,7 +141,8 @@ def main():
         img.setSeed(SEED)
 
         # Defining the lanes in the road
-        img.defineLanes(ROAD_LANES, LANE_VARIATION)
+        img.defineLanes(MIN_LANES, MAX_LANES, LANE_VARIATION)
+        ROAD_LANES = img.getLanesNumber()
 
         # Defining the separators:
         separator_settings = img.getRandomSeparator(MINS_WID, MAXS_WID, MIND_SIZ, MAXD_SIZ,
@@ -159,8 +167,8 @@ def main():
         sample_template = templates[template_class]
         lane_index = img.getRandomLane()
         x_offset, y_offset = img.getShift(MINCX, MAXCX, MINCY, MAXCY)
-        overlay, template_location = road.insertTemplateAtLane(overlay,
-                                    sample_template, lane_index, x=x_offset, y=y_offset)
+        overlay, template_locations = img.insertTemplatesAtLanes(overlay, x=x_offset, y=y_offset)
+        template_location, _ = ((0, 0),(1, 1)), "TEMPLATE" #template_locations[0] # TODO: Change this
 
         # Blending layers:
         output_img = blend(ground_texture, overlay)

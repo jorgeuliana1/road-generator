@@ -41,7 +41,7 @@ def get_bg_from_image(dimensions, image_path):
 
     return cv2.resize(img, dimensions, interpolation=cv2.INTER_AREA)
 
-def get_template_from_image(dimensions, divisions, image_path):
+def get_template_from_image(dimensions, image_path):
     unchanged_template = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
     th, tw, ta = unchanged_template.shape # Original template dimensions
     w, h = dimensions # Background dimensions
@@ -55,8 +55,8 @@ def get_template_from_image(dimensions, divisions, image_path):
     ratio = smaller / bigger
 
     # Resized image dimensions
-    template_w = math.floor(0.9 * w / divisions)
-    template_h = math.floor(template_w * ratio)
+    template_w = tw #math.floor(0.9 * w / divisions)
+    template_h = th #math.floor(template_w * ratio)
 
     # Getting template
     template_dim = (template_h, template_w)

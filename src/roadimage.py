@@ -27,7 +27,11 @@ class RoadImage:
     def setSeed(self, seed):
         random.seed(seed)
 
-    def defineLanes(self, number_of_lanes, variation):
+    def defineLanes(self, min_lanes, max_lanes, variation):
+
+        number_of_lanes = random.randint(min_lanes, max_lanes)
+        self.number_of_lanes = number_of_lanes
+
         default_lane_proportion = (self.w / float(number_of_lanes))/float(self.w)
         
         # Variation is given in percentage
@@ -122,3 +126,34 @@ class RoadImage:
         is_true = bool(random.getrandbits(1))
 
         return (width, color, is_true, dot_size, dot_dist, x_dist)
+
+    def getLanesNumber(self):
+        return self.number_of_lanes
+
+    def insertTemplatesAtLanes(self, layer, x=0, y=0):
+        # Creating insertion lists:
+        lanes = []
+        templates = []
+
+        # Selecting the number of lanes that will not be empty:
+        n_lanes = random.randint(-self.number_of_lanes, self.number_of_lanes)
+        n_lanes = abs(n_lanes)
+
+        # Selecting the lanes that will be filled and the content:
+        for i in range(n_lanes):
+            j = self.getRandomLane()
+            while j in set(lanes):
+                j = self.getRandomLane()
+                continue
+            lanes.append(j)
+            templates.append(random.randint(0, len(self.templates)))
+
+        # Filling lanes
+        locations = []
+        for i in range(len(lanes)):
+            road = self.getRoad()
+            template_names = tuple(self.templates.keys())
+            layer, location = road.insertTemplateAtLane(layer, self.templates[template_names[templates[i] - 1]], lanes[i], x=x, y=y)
+            locations.append((location, template_names[templates[i] - 1]))
+        
+        return layer, locations

@@ -33,20 +33,22 @@ class Lane:
         # Fixing template dimensions, if necessary:
         if t_h > self.h or t_w > self.w:
 
-            # Selecting the biggest size
-            if t_h > t_w:
-                biggest = t_h
-                ratio = self.h / biggest
-            else:
-                biggest = t_w
-                ratio = self.w / biggest
+            ratio = t_w / t_h
 
             # Changing dimensions
-            t_h, t_w = int(t_h * ratio), int(t_w * ratio)
+            if t_h > t_w:
+                t_h = self.h
+                t_w = ratio / t_h
+            else:
+                t_w = self.w
+                t_h = t_w / ratio
 
-            # Resizing template
-            new_template = cv2.resize(template, (t_w, t_h))
-            template = new_template
+        # Resizing template
+        t_h, t_w = t_w * 0.8, t_h * 0.8 # Inverting dimensions for more fidelity
+        # Converting to integer
+        t_h, t_w = int(t_h), int(t_w)
+        new_template = cv2.resize(template, (t_w, t_h))
+        template = new_template
 
         # Getting lane x and y:
         xc, yc = self.getAbsoluteCoordinates(x, y)
