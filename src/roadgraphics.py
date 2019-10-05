@@ -171,3 +171,6 @@ def draw_bbox(image, location, color):
     x1, y1 = pos1
 
     cv2.rectangle(image, (x0, y0), (x1, y1), color, 2)
+
+def resize_template(template, new_h, new_w):
+    return cv2.resize(template, (new_h, new_w), interpolation=cv2.INTER_AREA)

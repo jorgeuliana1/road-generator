@@ -5,6 +5,7 @@ class Road:
         self.w = w # Road width
         self.h = h # Road height
         self.lanes = [] # List of lanes
+        
     def newLane(self, lane_width):
         # Getting informations of the last created lane, if it exists
         lane_x0 = 0 # Default value
@@ -18,9 +19,11 @@ class Road:
         
         new_lane = Lane(lane_x0, lane_width, self.h)
         self.lanes.append(new_lane)
+
     def insertTemplateAtLane(self, layer, template, lane_index, x=0, y=0):
         lane = self.lanes[lane_index]
         return lane.insertTemplate(layer, template, x, y)
+
     def drawSeparator(self, index, layer, width=3, color=(255, 255, 255), dotted=False, dot_size=3, dot_distance=1, x_dist=0):
         if len(self.lanes) <= index+1:
             return layer

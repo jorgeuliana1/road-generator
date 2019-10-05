@@ -167,7 +167,7 @@ def main():
         sample_template = templates[template_class]
         lane_index = img.getRandomLane()
         x_offset, y_offset = img.getShift(MINCX, MAXCX, MINCY, MAXCY)
-        overlay, template_locations = img.insertTemplatesAtLanes(overlay, x=x_offset, y=y_offset)
+        overlay, template_locations = img.insertTemplatesAtLanes(overlay, x=x_offset, y=y_offset, min_w=TR_MINW, max_w=TR_MAXW, min_h=TR_MINH, max_h=TR_MAXH)
         template_location, _ = ((0, 0),(1, 1)), "TEMPLATE" #template_locations[0] # TODO: Change this
 
         # Blending layers:

@@ -30,10 +30,10 @@
         "MIN_Z" : 0
     },
     "TEMPLATE_RESIZE" : {
-        "MAX_H" : 20,
-        "MIN_H" : -20,
-        "MAX_W" : 20,
-        "MIN_W" : -20
+        "MAX_H" : 180,
+        "MIN_H" : 60,
+        "MAX_W" : 180,
+        "MIN_W" : 60
     },
     "PATHS" : {
         "GROUND_TEXTURES" : "asphalt_textures",
@@ -46,8 +46,8 @@
     "MARKPOS_VARIATION" : {
         "MAX_X" : 20,
         "MIN_X" : -20,
-        "MAX_Y" : 20,
-        "MIN_Y" : -20
+        "MAX_Y" : 100,
+        "MIN_Y" : -100
     },
     "SEED" : 0,
     "IMAGES" : 11

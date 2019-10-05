@@ -1,17 +1,10 @@
 from road import Road
 from mark_tracker import MarkTracker
-import roadgraphics
+from roadgraphics import *
 import random
 import math
 
 class RoadImage:
-    # Main informations:
-    # - Image dimensions
-    # - Image path
-    # - Number of lanes
-
-    # TODO: FINISH THE CLASS
-    
     def __init__(self, dimensions, path, background_images, asphalt_textures, templates, seed=0):
         self.w, self.h = dimensions
         self.path = path # Where the image will be saved
@@ -130,14 +123,14 @@ class RoadImage:
     def getLanesNumber(self):
         return self.number_of_lanes
 
-    def insertTemplatesAtLanes(self, layer, x=0, y=0):
+    def insertTemplatesAtLanes(self, layer, x=0, y=0, max_h=100, min_h=100, max_w=100, min_w=100):
         # Creating insertion lists:
         lanes = []
         templates = []
 
         # Selecting the number of lanes that will not be empty:
         n_lanes = random.randint(-self.number_of_lanes, self.number_of_lanes)
-        n_lanes = abs(n_lanes)
+        n_lanes = abs(n_lanes) # This makes it harder to have 0 lanes
 
         # Selecting the lanes that will be filled and the content:
         for i in range(n_lanes):
@@ -153,7 +146,14 @@ class RoadImage:
         for i in range(len(lanes)):
             road = self.getRoad()
             template_names = tuple(self.templates.keys())
-            layer, location = road.insertTemplateAtLane(layer, self.templates[template_names[templates[i] - 1]], lanes[i], x=x, y=y)
+
+            # Setting up template:
+            template = self.templates[template_names[templates[i] - 1]].copy()
+            h, w, _ = template.shape
+            dh, dw = int(random.randint(min_h, max_h) / 100 * h), int(random.randint(min_w, max_w) / 100 * w)
+            template = resize_template(template, dh, dw)
+
+            layer, location = road.insertTemplateAtLane(layer, template, lanes[i], x=x, y=y)
             locations.append((location, template_names[templates[i] - 1]))
         
         return layer, locations

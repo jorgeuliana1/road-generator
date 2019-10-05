@@ -1,6 +1,7 @@
 import math
 import numpy as np
 import cv2
+from roadgraphics import *
 
 class Lane:
     def __init__(self, x0, w, h):
@@ -18,44 +19,20 @@ class Lane:
         xa, ya = xc + x, yc + y
 
         # Rounding:
-        if x > 0:
-            xa, ya = math.ceil(xa), math.ceil(ya)
-        else:
-            xa, ya = math.floor(xa), math.floor(ya)
+        xa, ya = int(xa), int(ya)
 
         return xa, ya
     def insertTemplate(self, layer, template, x, y):
         # x and y are the coordinates related to the center of the template
         
         # Getting template dimensions:
-        t_h, t_w, _ = template.shape
-
-        # Fixing template dimensions, if necessary:
-        if t_h > self.h or t_w > self.w:
-
-            ratio = t_w / t_h
-
-            # Changing dimensions
-            if t_h > t_w:
-                t_h = self.h
-                t_w = ratio / t_h
-            else:
-                t_w = self.w
-                t_h = t_w / ratio
-
-        # Resizing template
-        t_h, t_w = t_w * 0.8, t_h * 0.8 # Inverting dimensions for more fidelity
-        # Converting to integer
-        t_h, t_w = int(t_h), int(t_w)
-        new_template = cv2.resize(template, (t_w, t_h))
-        template = new_template
+        t_w, t_h, _ = template.shape
 
         # Getting lane x and y:
         xc, yc = self.getAbsoluteCoordinates(x, y)
 
         # Finding the template insertion vertexes:
-        x0, x1 = math.floor(xc - t_w/2.00), math.floor(xc + t_w/2.00)
-        y0, y1 = math.floor(yc - t_h/2.00), math.floor(yc + t_h/2.00)
+        x0, y0, x1, y1 = self.getTemplateCoords(template, dx=x, dy=y)
 
         # Adding the shift:
         y0 += y
@@ -64,18 +41,7 @@ class Lane:
         x1 += x
 
         # Correcting shift (if necessary):
-        if x1 > self.x0 + self.w:
-            x1 = self.x0 + self.w
-            x0 = x1 - t_w
-        if x0 < self.x0:
-            x0 = self.x0
-            x1 = x0 + t_w
-        if y1 > self.h:
-            y1 = self.h
-            y0 = y1 - t_h
-        if y0 < 0:
-            y0 = 0
-            y1 = t_h
+        x0, y0, x1, y1 = self.correctShift(template, x, y)
 
         # Inserting the image:
         new_layer = layer.copy()
@@ -83,6 +49,7 @@ class Lane:
 
         # Returning template location:
         return new_layer, ((x0, y0), (x1, y1))
+
     def drawSeparator(self, layer, right_limit, left_limit, width=3, color=(255, 255, 255), dotted=False, dot_size=3, dot_distance=1, x_dist=0):
         height = self.h # For code simplification
         new_layer = layer.copy()
@@ -119,11 +86,85 @@ class Lane:
                 overlay[j][left_limit:right_limit] = pixel
         
         return new_layer + overlay
+
     def drawRightSeparator(self, layer, width=3, color=(255, 255, 255), dotted=False, dot_size=3, dot_distance=1, x_dist=0):
         right_limit = self.x0 + self.w - x_dist
         left_limit = right_limit - width
         return self.drawSeparator(layer, right_limit, left_limit, width=width, color=color, dotted=dotted, dot_size=dot_size, dot_distance=dot_distance, x_dist=x_dist)
+
     def drawLeftSeparator(self, layer, width=3, color=(255, 255, 255), dotted=False, dot_size=3, dot_distance=1, x_dist=0):
         left_limit = self.x0 + x_dist
         right_limit = left_limit + width
         return self.drawSeparator(layer, right_limit, left_limit, width=width, color=color, dotted=dotted, dot_size=dot_size, dot_distance=dot_distance, x_dist=x_dist)
+
+    def fits(self, template, dx=0, dy=0):
+        template_height, template_width, _ = template.shape
+        
+        if self.h < template_height or self.w < template_width:
+            return False
+        
+        # dx and dy represent the displacement of the template
+
+        # Getting the absolute points:
+        x0, y0, x1, y1 = self.getTemplateCoords(template, dx=dx, dy=dy)
+
+        # Analyzing point by point:
+        if x0 < self.x0 or x1 > (self.x0 + self.w):
+            print("a")
+            return False
+        
+        if y0 < 0 or y1 > self.h:
+            print("b")
+            return False
+
+        return True
+
+    def getTemplateCoords(self, template, dx=0, dy=0):
+        # dx and dy represent the displacement of the template
+        height, width, _ = template.shape
+
+        # Getting relative coordinates:
+        rx0 = int(- width/2 + dx)
+        ry0 = int(-height/2 + dy)
+        rx1 = int(  width/2 + dx)
+        ry1 = int( height/2 + dy)
+
+        # Correcting sizes:
+        if (height + 2 * dy) % 2 != 0:
+            ry0 -= 1
+        if (width  + 2 * dx) % 2 != 0:
+            rx0 -= 1
+
+        # Getting the absolute coordinates:
+        x0, y0 = self.getAbsoluteCoordinates(rx0, ry0)
+        x1, y1 = self.getAbsoluteCoordinates(rx1, ry1)
+
+        # If the difference persists...
+        if x1 - x0 != width:
+            x1 -= 1
+        if y1 - y0 != height:
+            y1 -= 1
+
+        return x0, y0, x1, y1
+
+    def correctShift(self, template, dx, dy):
+
+        t_h, t_w, _ = template.shape
+
+        x0, y0, x1, y1 = self.getTemplateCoords(template, dx=dx, dy=dy)
+
+        # Correcting shift:
+        if x1 > self.x0 + self.w:
+            x1 = self.x0 + self.w
+            x0 = x1 - t_w
+        if x0 < self.x0:
+            x0 = self.x0
+            x1 = x0 + t_w
+        if y1 > self.h:
+            y1 = self.h
+            y0 = y1 - t_h
+        if y0 < 0:
+            y0 = 0
+            y1 = t_h
+
+        return x0, y0, x1, y1
