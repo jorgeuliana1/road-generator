@@ -7,6 +7,7 @@ from mark_tracker import MarkTracker
 from road import Road
 from roadimage import RoadImage
 from roadgraphics import *
+import random
 
 def show_image(image):
     cv2.imshow('image', image)
@@ -15,6 +16,11 @@ def show_image(image):
 
 def save_image(image, title="", path="image.jpg"):
     cv2.imwrite(title+path, image)
+
+def save_csv(trackers, title, path):
+    with open(path+"/"+title, 'w') as f:
+        for t in trackers:
+            f.write(t.getString()+"\n")
 
 def load_templates(path, dimensions):
     files = os.listdir(path)
@@ -128,6 +134,8 @@ def main():
     ground_textures = load_backgrounds(GROUND_TEXTURES, (WIDTH, HEIGHT))
     # Loading the backgrounds:
     backgrounds = load_backgrounds(BACKGROUNDS, (WIDTH, HEIGHT))
+    # Creating marktrackers list:
+    trackers = []
 
     for i in range(NUMI):
         # Image generation loop
@@ -139,6 +147,9 @@ def main():
         DESTINY = generate_outpath(DES_FOLDER, FN_PATTERN, images_counter, F_EXTENSION, NUMI)
         img = RoadImage((WIDTH, HEIGHT), DESTINY, backgrounds, ground_textures, templates)
         img.setSeed(SEED)
+
+        # Creating the marktrackers sublist:
+        sub_trackers = []
 
         # Defining the lanes in the road
         img.defineLanes(MIN_LANES, MAX_LANES, LANE_VARIATION)
@@ -168,7 +179,20 @@ def main():
         lane_index = img.getRandomLane()
         x_offset, y_offset = img.getShift(MINCX, MAXCX, MINCY, MAXCY)
         overlay, template_locations = img.insertTemplatesAtLanes(overlay, x=x_offset, y=y_offset, min_w=TR_MINW, max_w=TR_MAXW, min_h=TR_MINH, max_h=TR_MAXH)
-        template_location, _ = ((0, 0),(1, 1)), "TEMPLATE" #template_locations[0] # TODO: Change this
+
+        # Creating marktrackers:
+        for i in template_locations:
+            p, label = i
+            p1, p2 = p
+            x0, y0 = p1
+            x1, y1 = p2
+
+            filename = "" + DESTINY
+            filename = filename[len(DES_FOLDER)+1:]
+
+            tracker = MarkTracker(filename)
+            tracker.addLocation((x0, y0, x1, y1), label)
+            sub_trackers.append(tracker)
 
         # Blending layers:
         output_img = blend(ground_texture, overlay)
@@ -179,16 +203,17 @@ def main():
         output_img, y_shift = bring_to_bottom(output_img)
         x_shift = 0
 
-        # Getting the template location
-        tracker = MarkTracker(DESTINY)
-        tracker.addLocation(template_location, template_class)
-        tracker.update(x_shift, y_shift, r_x)
+        # Updating marktrackers:
+        for t in sub_trackers:
+            t.move(x_shift, y_shift)
+            t.applyPerspective(r_x, r_y, r_z, 0, 0, 0, (HEIGHT, WIDTH)) # Must change later
 
         # Final blending:
         output_img = blend(bg_img, output_img)
 
-        # Drawing bounding box around the template:
-        # draw_bbox(output_img, tracker.getLocation(0), RED) # Must change later
+        # Drawing bounding boxes around the templates:
+        #for t in sub_trackers:
+            #draw_bbox(output_img, t.getLocation(), RED)
 
         # TODO: FIX THE TRACKER
 
@@ -198,7 +223,12 @@ def main():
 
         # Preparing for the next round:
         images_counter+=1
-        SEED+=1 # Must find a better solution later, but for now it works well
+        SEED+=random.randint(0, 255) # Must find a better solution later, but for now it works well
+
+        trackers += sub_trackers
+
+    # Saving trackers csv:
+    save_csv(trackers, "annotations.csv", DES_FOLDER)
 
     print("Dataset generated successfully.")
 

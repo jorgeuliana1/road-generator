@@ -1,90 +1,102 @@
 import math
+import numpy as np
 
 class MarkTracker:
-    filename = ""
-    locations = []
+    __filename = ""
+    __location = (0, 0, 0, 0)
+    __label    = ""
 
     def __init__(self, filename):
-        self.filename = filename
+        self.__filename = filename
+
     def addLocation(self, location, m_class):
-        track = (location, m_class)
-        self.locations.append(track)
-    def getLocationString(self, index):
-        location = self.locations[index]
-        location, _ = location
+        self.__location = location
+        # Location format:
+        # (x0, y0, x1, y1)
+        self.__label = m_class
 
-        # Getting Xs and Ys:
-        pos0, pos1 = location
-        x0, y0 = pos0
-        x1, y1 = pos1
+    def getString(self):
 
-        string = str(x0) + "," + str(y0) + "," + str(x1) + "," + str(y1)
-        return string
-    def getClass(self, index):
-        location   = self.locations[index]
-        _, m_class = location
+        # Getting Xs and Ys
+        x0, y0, x1, y1 = self.__location
 
-        return m_class
-    def getInformation(self, index):
-        return getLocationString(self, index) + "," + getClass(self, index)
-    def location_after_moving(location, x_movement, y_movement):
-        pos0, pos1 = location
-        x0, y0 = pos0
-        x1, y1 = pos1
+        # Formatting string
+        loc_str = str(x0) + "," + str(y0) + "," + str(x1) + "," + str(y1)
+        full_st = self.__filename + "," + loc_str + "," + self.__label
+        return full_st
 
-        return ((x0 + x_movement, y0 + y_movement), (x1 + x_movement, y1 + y_movement))
-    def location_after_perspective(location, rotation_radians):
-        # Getting Xs and Ys:
-        pos0, pos1 = location
-        x0, y0 = pos0
-        x1, y1 = pos1
+    def getLabel(self):
+        return self.__label
 
-        # Putting points in cartesian coordinates
-        ref_x = (x0 + x1) / 2
-        ref_y = (y0 + y1) / 2
-        x0, x1 = x0 - ref_x, x1 - ref_x
-        y0, y1 = y0 - ref_y, y1 - ref_y
+    def getLocation(self):
+        return self.__location
 
-        # Converting to 3D points
-        # pos0 = (x0, y0, 0)
-        # pos1 = (x1, y1, 0)
-        # The rotation must follow the rule:
-        # z ** 2 + y ** 2 = y0 ** 2
-        # Thus:
-        # z = y0*cos(radians)
-        # y = y0*sin(radians)
+    def move(self, dx, dy):
 
-        # Doing the rotation:
-        pos0 = (x0, y0*math.cos(rotation_radians), y0*math.sin(rotation_radians))
-        pos1 = (x1, y1*math.cos(rotation_radians), y1*math.sin(rotation_radians))
+        dx, dy = int(dx), int(dy)
 
-        # Converting to 2D:
-        x0, y0, _ = pos0
-        x1, y1, _ = pos1
-        x0, y0 = x0 * 2.4 + ref_x, y0 * 1.2 + ref_y # Returning to default coordinates
-        x1, y1 = x1 * 2.4 + ref_x, y1 * 1.2 + ref_y # Returning to default coordinates
-        pos0 = (int(x0), int(y0))
-        pos1 = (int(x1), int(y1))
+        # Getting Xs and Ys
+        x0, y0, x1, y1 = self.__location
 
-        new_location = (pos0, pos1)
+        # Inserting new values
+        self.__location = (x0 + dx, y0 + dy, x1 + dx, y1 + dy)
 
-        return new_location
-    def updateLocation(self, index, x_move, y_move, x_rotation):
-        location = self.locations[index]
-        pos, m_class = location
-        pos = MarkTracker.location_after_perspective(pos, x_rotation)
-        pos = MarkTracker.location_after_moving(pos, x_move, y_move)
-        location = (pos, m_class)
-        self.locations[index] = location
-    def update(self, x_move, y_move, x_rotation):
-        for i in range(len(self.locations)):
-            self.updateLocation(i, x_move, y_move, x_rotation)
-    def getLocation(self, index):
-        loc = self.locations[index]
-        pos, _ = loc
-        loc0, loc1 = pos
-        x0, y0 = loc0
-        x1, y1 = loc1
-        return ((int(x0), int(y0)), (int(x1), int(y1)))
-    def getFilename(self):
-        return self.filename
+    def applyPerspective(self, theta, phi, gamma, dx, dy, dz, image_dimensions):
+
+        h, w = image_dimensions
+
+        d = np.sqrt(h**2 + w**2)
+        focal = d / (2 * np.sin(gamma) if np.sin(gamma) != 0 else 1)
+        dz = focal
+        f = focal
+
+        # 2D to 3D
+        A1 = np.array([[1,    0, -w/2],
+                    [0,    1, -h/2],
+                    [0,    0,    1],
+                    [0,    0,    1]])
+
+        # Rotating X, Y and Z
+        RX = np.array([[1, 0, 0, 0],
+                    [0, np.cos(theta), -np.sin(theta), 0],
+                    [0, np.sin(theta), np.cos(theta), 0],
+                    [0, 0, 0, 1]])
+
+        RY = np.array([[np.cos(phi), 0, -np.sin(phi), 0],
+                    [0, 1, 0, 0],
+                    [np.sin(phi), 0, np.cos(phi), 0],
+                    [0, 0, 0, 1]])
+
+        RZ = np.array([[np.cos(gamma), -np.sin(gamma), 0, 0],
+                    [np.sin(gamma), np.cos(gamma), 0, 0],
+                    [0, 0, 1, 0],
+                    [0, 0, 0, 1]])
+
+        # Composing R matrix
+        R = np.dot(np.dot(RX, RY), RZ)
+        # Translation matrix
+        T = np.array([[1, 0, 0, dx],
+                    [0, 1, 0, dy],
+                    [0, 0, 1, dz],
+                    [0, 0, 0, 1]])
+        # Converting 3D to 2D again
+        A2 = np.array([[f, 0, w/2, 0],
+                    [0, f, h/2, 0],
+                    [0, 0, 1, 0]])
+
+        # Final transformation matrix
+        TM = np.dot(A2, np.dot(T, np.dot(R, A1)))
+
+        # Preparing to apply the transformation in the points:
+        x0, y0, x1, y1 = self.__location
+        p1 = np.array([x0, y0, f])
+        p2 = np.array([x1, y1, f])
+
+        # Applying the transformation:
+        p1 = np.dot(p1, TM)
+        p2 = np.dot(p2, TM)
+
+        x0, y0, _ = p1
+        x1, y1, _ = p2
+
+        self.__location = int(x0/w), int(y0/h), int(x1/w), int(y1/h)

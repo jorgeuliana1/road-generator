@@ -46,17 +46,9 @@ def get_template_from_image(dimensions, image_path):
     th, tw, ta = unchanged_template.shape # Original template dimensions
     w, h = dimensions # Background dimensions
 
-    # Getting the image ratio
-    smaller = th
-    bigger  = tw
-    if tw < th:
-        smaller = tw
-        bigger  = th
-    ratio = smaller / bigger
-
     # Resized image dimensions
-    template_w = tw #math.floor(0.9 * w / divisions)
-    template_h = th #math.floor(template_w * ratio)
+    template_w = tw
+    template_h = th
 
     # Getting template
     template_dim = (template_h, template_w)
@@ -166,10 +158,7 @@ def bring_to_bottom(image):
 
 def draw_bbox(image, location, color):
     # Getting Xs and Ys:
-    pos0, pos1 = location
-    x0, y0 = pos0
-    x1, y1 = pos1
-
+    x0, y0, x1, y1 = location
     cv2.rectangle(image, (x0, y0), (x1, y1), color, 2)
 
 def resize_template(template, new_h, new_w):

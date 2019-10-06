@@ -24,9 +24,6 @@ class Lane:
         return xa, ya
     def insertTemplate(self, layer, template, x, y):
         # x and y are the coordinates related to the center of the template
-        
-        # Getting template dimensions:
-        t_w, t_h, _ = template.shape
 
         # Getting lane x and y:
         xc, yc = self.getAbsoluteCoordinates(x, y)
@@ -34,13 +31,8 @@ class Lane:
         # Finding the template insertion vertexes:
         x0, y0, x1, y1 = self.getTemplateCoords(template, dx=x, dy=y)
 
-        # Adding the shift:
-        y0 += y
-        y1 += y
-        x0 += x
-        x1 += x
-
-        # Correcting shift (if necessary):
+        # Correcting shift and template dimensions (if necessary):
+        template = self.correctDimensions(template, dx=x, dy=y)
         x0, y0, x1, y1 = self.correctShift(template, x, y)
 
         # Inserting the image:
@@ -110,11 +102,9 @@ class Lane:
 
         # Analyzing point by point:
         if x0 < self.x0 or x1 > (self.x0 + self.w):
-            print("a")
             return False
         
         if y0 < 0 or y1 > self.h:
-            print("b")
             return False
 
         return True
@@ -139,12 +129,6 @@ class Lane:
         x0, y0 = self.getAbsoluteCoordinates(rx0, ry0)
         x1, y1 = self.getAbsoluteCoordinates(rx1, ry1)
 
-        # If the difference persists...
-        if x1 - x0 != width:
-            x1 -= 1
-        if y1 - y0 != height:
-            y1 -= 1
-
         return x0, y0, x1, y1
 
     def correctShift(self, template, dx, dy):
@@ -168,3 +152,22 @@ class Lane:
             y1 = t_h
 
         return x0, y0, x1, y1
+
+    def correctDimensions(self, template, dx=0, dy=0):
+        
+        t_h, t_w, _ = template.shape
+
+        x0, y0, x1, y1 = self.getTemplateCoords(template, dx=dx, dy=dy)
+
+        # Correcting dimensions
+        if t_w > self.w:
+            x0 = self.x0
+            x1 = int((self.x0 + self.w) * 0.9)
+        if t_h > self.h:
+            y0 = 0
+            y1 = int(self.h * 0.9)
+
+        # Resizing template
+        template = cv2.resize(template, (x1-x0, y1-y0), interpolation=cv2.INTER_AREA)
+
+        return template

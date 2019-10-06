@@ -30,10 +30,10 @@
         "MIN_Z" : 0
     },
     "TEMPLATE_RESIZE" : {
-        "MAX_H" : 180,
-        "MIN_H" : 60,
-        "MAX_W" : 180,
-        "MIN_W" : 60
+        "MAX_H" : 160,
+        "MIN_H" : 80,
+        "MAX_W" : 160,
+        "MIN_W" : 80
     },
     "PATHS" : {
         "GROUND_TEXTURES" : "asphalt_textures",
