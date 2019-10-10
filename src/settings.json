@@ -50,5 +50,10 @@
         "MIN_Y" : -100
     },
     "SEED" : 0,
-    "IMAGES" : 11
+    "IMAGES" : 11,
+    "IMAGE_TRANSFORM" : {
+        "MAX_BLUR" : 5,
+        "MAX_CONTRAST" : 20,
+        "MAX_BRIGHTNESS" : 20
+    }
 }

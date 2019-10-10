@@ -163,3 +163,18 @@ def draw_bbox(image, location, color):
 
 def resize_template(template, new_h, new_w):
     return cv2.resize(template, (new_h, new_w), interpolation=cv2.INTER_AREA)
+
+def apply_color_distortions(img, bright, contrast):
+    new_image = np.zeros(img.shape, img.dtype)
+    alpha = 1 + 2 * contrast
+    beta  = 100 * bright
+    for y in range(img.shape[0]):
+        for x in range(img.shape[1]):
+            for c in range(img.shape[2]):
+                new_image[y,x,c] = np.clip(alpha*img[y,x,c] + beta, 0, 255)
+
+    return new_image
+
+def apply_blur(img, blur):
+    out = cv2.medianBlur(img, int(blur))
+    return out

@@ -157,3 +157,12 @@ class RoadImage:
             locations.append((location, template_names[templates[i] - 1]))
         
         return layer, locations
+
+    def getTransform(self, maxblur, maxconstrast, maxbrightness):
+        constrast = random.randint(0, maxconstrast)
+        brightness = random.randint(0, maxbrightness)
+        blurvalues = [1, 1, 3, 3, 5, 5, 7, 7, 9, 9]
+        constrast = random.randint(0, maxconstrast)
+        blur = blurvalues[random.randint(0, maxblur)]
+
+        return blur, constrast/100, brightness/100

@@ -50,8 +50,19 @@ class MarkTracker:
         dz = focal
         f = focal
 
+        # Defining the points:
+        # UR : Up-right point
+        # UL : Up-left point
+        # DR : Down-right point
+        # DL : Down-left point
+        x0, y0, x1, y1 = self.__location
+        ur = np.array([x0, y0, 1])
+        ul = np.array([x1, y0, 1])
+        dr = np.array([x0, y1, 1])
+        dl = np.array([x1, y1, 1])
+
         # 2D to 3D
-        A1 = np.array([[1,    0, -w/2],
+        A1 = np.array([[1, 0, -w/2],
                     [0,    1, -h/2],
                     [0,    0,    1],
                     [0,    0,    1]])
@@ -87,16 +98,41 @@ class MarkTracker:
         # Final transformation matrix
         TM = np.dot(A2, np.dot(T, np.dot(R, A1)))
 
-        # Preparing to apply the transformation in the points:
-        x0, y0, x1, y1 = self.__location
-        p1 = np.array([x0, y0, f])
-        p2 = np.array([x1, y1, f])
+        # Applying the perspective to the points
+        tw = x1 - x0
+        th = y1 - y0
+        P = np.array([[0, tw, tw, 0],
+                      [0, 0, th, th],
+                      [1, 1, 1, 1]])
+        O = np.array([[x0, x1],
+                      [y0, y1],
+                      [1, 1]])
 
-        # Applying the transformation:
-        p1 = np.dot(p1, TM)
-        p2 = np.dot(p2, TM)
+        Pl = np.dot(TM, P)
+        Or = np.dot(TM, O)
 
-        x0, y0, _ = p1
-        x1, y1, _ = p2
+        newxs = Pl[0, :] / Pl[2, :]
+        newys = Pl[1, :] / Pl[2, :]
+        oxs = Or[0, :] / Or[2, :]
+        oys = Or[1, :] / Or[2, :]
+        x0 = oxs.min()
+        x1 = oxs.max()
+        y0 = oys.min()
+        y1 = oys.max()
+        minnewxs = newxs.min()
+        minnewys = newys.min()
+        maxnewxs = newxs.max()
+        maxnewys = newys.max()
 
-        self.__location = int(x0/w), int(y0/h), int(x1/w), int(y1/h)
+        nw = int(math.ceil(maxnewxs)) - int(math.floor(minnewxs))
+        nh = int(math.ceil(maxnewys)) - int(math.floor(minnewys))
+
+        hnw = (nw / 2)*1.2
+        hnh = (nh / 2)*1.2
+
+        xc = (x0 + x1)/2
+
+        x0 = xc - hnw
+        x1 = xc + hnw
+
+        self.__location = (int(x0), int(y0), int(x1), int(y1))

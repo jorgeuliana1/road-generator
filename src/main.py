@@ -125,6 +125,9 @@ def main():
 
     SEED = json_file["SEED"]
     NUMI = json_file["IMAGES"]
+    MAXBLUR = json_file["IMAGE_TRANSFORM"]["MAX_BLUR"]
+    MAXCONTRAST = json_file["IMAGE_TRANSFORM"]["MAX_CONTRAST"]
+    MAXBRIGHT = json_file["IMAGE_TRANSFORM"]["MAX_BRIGHTNESS"]
 
     images_counter = 0 # To generate filename
 
@@ -205,17 +208,20 @@ def main():
 
         # Updating marktrackers:
         for t in sub_trackers:
-            t.move(x_shift, y_shift)
             t.applyPerspective(r_x, r_y, r_z, 0, 0, 0, (HEIGHT, WIDTH)) # Must change later
+            t.move(x_shift, y_shift)
 
         # Final blending:
         output_img = blend(bg_img, output_img)
 
-        # Drawing bounding boxes around the templates:
-        #for t in sub_trackers:
-            #draw_bbox(output_img, t.getLocation(), RED)
+        # Applying the color distortions
+        blur, contrast, brightness = img.getTransform(MAXBLUR, MAXCONTRAST, MAXBRIGHT)
+        output_img = apply_color_distortions(output_img, brightness, contrast)
+        output_img = apply_blur(output_img, blur)
 
-        # TODO: FIX THE TRACKER
+        # Drawing bounding boxes around the templates:
+        for t in sub_trackers:
+            draw_bbox(output_img, t.getLocation(), RED)
 
         # Saving image:
         save_image(output_img, path=DESTINY)
