@@ -162,9 +162,14 @@ def main():
 
         # Creating the image
         DESTINY = generate_outpath(DES_FOLDER, FN_PATTERN, images_counter, F_EXTENSION, NUMI)
-        img = RoadImage((WIDTH, HEIGHT), DESTINY, backgrounds, ground_textures, templates)
-        img.setSeed(SEED)
-
+        if i == 0:
+            set_seed = True
+        else:
+            set_seed = False
+        img = RoadImage((WIDTH, HEIGHT), "", backgrounds, ground_textures, templates, set_seed=set_seed)
+        if i == 0:
+            img.setSeed(SEED)
+    
         # Creating the marktrackers sublist:
         sub_trackers = []
 
@@ -247,7 +252,7 @@ def main():
 
         # Preparing for the next round:
         images_counter+=1
-        SEED+=random.randint(0, 255) # Must find a better solution later, but for now it works well
+        # SEED+=random.randint(0, 255) # Must find a better solution later, but for now it works well
 
         trackers += sub_trackers
 

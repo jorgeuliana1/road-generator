@@ -5,7 +5,7 @@ import random
 import math
 
 class RoadImage:
-    def __init__(self, dimensions, path, background_images, asphalt_textures, templates, seed=0):
+    def __init__(self, dimensions, path, background_images, asphalt_textures, templates, seed=0, set_seed=True):
         self.w, self.h = dimensions
         self.path = path # Where the image will be saved
         self.road = Road(self.w, self.h)
@@ -15,7 +15,8 @@ class RoadImage:
         self.backgrounds = background_images
         self.grounds = asphalt_textures
 
-        random.seed(seed)
+        if set_seed:
+            random.seed(seed)
 
     def setSeed(self, seed):
         random.seed(seed)
@@ -153,8 +154,13 @@ class RoadImage:
             dh, dw = int(random.randint(min_h, max_h) / 100 * h), int(random.randint(min_w, max_w) / 100 * w)
             template = resize_template(template, dh, dw)
 
-            layer, location = road.insertTemplateAtLane(layer, template, lanes[i], x=x, y=y)
-            locations.append((location, template_names[templates[i] - 1]))
+            # Getting the result of the insertion
+            
+            result = road.insertTemplateAtLane(layer, template, lanes[i], x=x, y=y)
+
+            if result != False:
+                layer, location = result
+                locations.append((location, template_names[templates[i] - 1]))
         
         return layer, locations
 

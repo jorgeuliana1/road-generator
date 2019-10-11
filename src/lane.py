@@ -35,12 +35,18 @@ class Lane:
         template = self.correctDimensions(template, dx=x, dy=y)
         x0, y0, x1, y1 = self.correctShift(template, x, y)
 
-        # Inserting the image:
-        new_layer = layer.copy()
-        new_layer[y0:y1, x0:x1] = template
+        try:
 
-        # Returning template location:
-        return new_layer, ((x0, y0), (x1, y1))
+            # Inserting the image:
+            new_layer = layer.copy()
+            new_layer[y0:y1, x0:x1] = template
+
+            # Returning template location:
+            return new_layer, ((x0, y0), (x1, y1))
+
+        except:
+            
+            return False
 
     def drawSeparator(self, layer, right_limit, left_limit, width=3, color=(255, 255, 255), dotted=False, dot_size=3, dot_distance=1, x_dist=0):
         height = self.h # For code simplification
