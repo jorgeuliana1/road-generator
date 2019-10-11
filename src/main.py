@@ -29,7 +29,7 @@ def save_classes(templates, filename, folder):
     with open(folder+"/"+filename, "w") as f:
         f.write("{\n")
         for i in range(0, len(t_labels)):
-            f.write("\t\""+t_labels[i]+"\" :"+str(i))
+            f.write("\t\""+t_labels[i]+"\": "+str(i))
             if i != len(t_labels) - 1:
                 f.write(",\n")
             else:
@@ -237,9 +237,9 @@ def main():
         output_img = apply_color_distortions(output_img, brightness, contrast)
         output_img = apply_blur(output_img, blur)
 
-        # Drawing bounding boxes around the templates:
-        for t in sub_trackers:
-            draw_bbox(output_img, t.getLocation(), RED)
+        # Drawing bounding boxes around the templates (for testing purposes only):
+        #for t in sub_trackers:
+            #draw_bbox(output_img, t.getLocation(), RED)
 
         # Saving image:
         save_image(output_img, path=DESTINY)
