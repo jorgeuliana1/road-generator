@@ -166,3 +166,20 @@ class RoadImage:
         blur = blurvalues[random.randint(0, maxblur)]
 
         return blur, constrast/100, brightness/100
+
+    def getAgingMatrix(self):
+        h, w = self.h, self.w
+        mw = math.floor(math.sqrt(h))
+        mh = mw
+
+        matrix = []
+
+        for i in range(0, mh):
+            matrix.append([])
+            for j in range(0, mw):
+                new = abs(random.randint(-175, 175)) # How "new/fresh" the finish is
+                if new > 100:
+                    new = 100
+                matrix[i].append(new)
+
+        return matrix

@@ -22,6 +22,20 @@ def save_csv(trackers, title, path):
         for t in trackers:
             f.write(t.getString()+"\n")
 
+def save_classes(templates, filename, folder):
+    t_labels = list(templates.keys())
+    t_labels.insert(0, "__background__")
+
+    with open(folder+"/"+filename, "w") as f:
+        f.write("{\n")
+        for i in range(0, len(t_labels)):
+            f.write("\t\""+t_labels[i]+"\" :"+str(i))
+            if i != len(t_labels) - 1:
+                f.write(",\n")
+            else:
+                f.write("\n")
+        f.write("}")
+
 def load_templates(path, dimensions):
     files = os.listdir(path)
     templates = {}
@@ -197,6 +211,10 @@ def main():
             tracker.addLocation((x0, y0, x1, y1), label)
             sub_trackers.append(tracker)
 
+        # Aging roadmarks:
+        age_matrix = img.getAgingMatrix()
+        overlay = age_layer(overlay, age_matrix)
+
         # Blending layers:
         output_img = blend(ground_texture, overlay)
 
@@ -235,6 +253,7 @@ def main():
 
     # Saving trackers csv:
     save_csv(trackers, "annotations.csv", DES_FOLDER)
+    save_classes(templates, "classes.json", DES_FOLDER)
 
     print("Dataset generated successfully.")
 

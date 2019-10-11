@@ -2,35 +2,6 @@ import numpy as np
 import math
 import cv2
 
-def insert_template(image, divisions, block_to_add, template):
-    # Finding the block limits
-    image_h, image_w, image_c = image.shape
-    block_width = math.ceil(image_w / divisions)
-    block_ul = (block_width * (block_to_add - 1), 0) # Upper left limit of the block
-    block_dr = (block_width * block_to_add, image_h) # Down right limit of the block
-
-    # Finding the block mean point
-    ul_x, ul_y = block_ul
-    dr_x, dr_y = block_dr
-
-    mpoint = ((ul_x + dr_x)/2, (ul_y + dr_y)/2) # Creating the mean point as a tuple
-    mpoint_x, mpoint_y = mpoint
-
-    # Finding the template dimensions
-    t_h, t_w, t_c = template.shape
-
-    # Finding the insertion points
-    insertion_ul = (math.ceil(mpoint_x - t_w/2), math.ceil(mpoint_y - t_h/2))
-    insertion_dr = (math.ceil(mpoint_x + t_w/2), math.ceil(mpoint_y + t_h/2))
-    iul_x, iul_y = insertion_ul
-    idr_x, idr_y = insertion_dr
-
-    # Inserting the image at the points
-    image[iul_y:idr_y, iul_x:idr_x] = template
-
-    template_location = ((iul_x, iul_y), (idr_x, idr_y))
-    return template_location
-
 def get_bg_from_image(dimensions, image_path):
     WIDTH, HEIGHT = dimensions
     img = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
@@ -42,17 +13,9 @@ def get_bg_from_image(dimensions, image_path):
     return cv2.resize(img, dimensions, interpolation=cv2.INTER_AREA)
 
 def get_template_from_image(dimensions, image_path):
-    unchanged_template = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
-    th, tw, ta = unchanged_template.shape # Original template dimensions
-    w, h = dimensions # Background dimensions
-
-    # Resized image dimensions
-    template_w = tw
-    template_h = th
-
-    # Getting template
-    template_dim = (template_h, template_w)
-    template = cv2.resize(unchanged_template, template_dim, interpolation=cv2.INTER_AREA)
+    template = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
+    h, w, _ = template.shape
+    template = cv2.resize(template, (h, w), interpolation=cv2.INTER_AREA)
     return template
 
 def generate_empty_templates_layer(dimensions):
@@ -178,3 +141,32 @@ def apply_color_distortions(img, bright, contrast):
 def apply_blur(img, blur):
     out = cv2.medianBlur(img, int(blur))
     return out
+
+def age_layer(layer, age_matrix):
+    def age(layer, age_coef, x0, y0, x1, y1):
+        b, g, r, a = cv2.split(layer)
+        h, w = a.shape
+
+        for i in range(y0, y1):
+            for j in range(x0, x1):
+                a[i][j] = a[i][j] * age_coef
+
+        layer = cv2.merge((b, g, r, a))
+        return layer
+
+    lh, lw, _ = layer.shape
+    mh, mw = len(age_matrix), len(age_matrix[0])
+    h, w = math.floor(lh/mh), math.floor(lw/mw)
+    nlayer = layer.copy()
+
+    for i in range(0, mh):
+        for j in range(0, mw):
+            x0, x1 = j * w, (j + 1) * w
+            y0, y1 = i * h, (i + 1) * h
+
+            age_coef = age_matrix[i][j] / 100
+            nlayer = age(nlayer, age_coef, x0, y0, x1, y1)
+
+    return nlayer
+
+
