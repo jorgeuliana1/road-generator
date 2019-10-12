@@ -4,7 +4,7 @@ import cv2
 
 def get_bg_from_image(dimensions, image_path):
     WIDTH, HEIGHT = dimensions
-    img = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
+    img = cv2.imread(image_path, cv2.IMREAD_COLOR)
 
     # Convert the image from RGB2RGBA
     if len(img.shape) > 2 and img.shape[2] == 3:
