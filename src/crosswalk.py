@@ -2,12 +2,9 @@ import cv2
 import numpy as np
 
 class CrossWalk:
-    __bars    = 1
-    __width   = 32
-    __height  = 16
-    __bar_w   = 32
-    __bar_h   = 16
-    __spacing = 16
+    __bar_w   = 4
+    __bar_h   = 64
+    __spacing = 4
 
     def __init__(self, bars):
         self.__bars   = bars

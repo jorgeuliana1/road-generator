@@ -252,7 +252,6 @@ def main():
 
         # Preparing for the next round:
         images_counter+=1
-        # SEED+=random.randint(0, 255) # Must find a better solution later, but for now it works well
 
         trackers += sub_trackers
 
