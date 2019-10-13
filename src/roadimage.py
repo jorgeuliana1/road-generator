@@ -1,6 +1,7 @@
 from road import Road
 from mark_tracker import MarkTracker
 from roadgraphics import *
+from crosswalk import CrossWalk
 import random
 import math
 
@@ -149,7 +150,14 @@ class RoadImage:
             template_names = tuple(self.templates.keys())
 
             # Setting up template:
-            template = self.templates[template_names[templates[i] - 1]].copy()
+            crosswalk_name = "FAIXAPEDESTRES"
+            template_name  = template_names[templates[i] - 1]
+            if template_name == crosswalk_name:
+                n_cw     = random.randint(4, 7)
+                cw       = CrossWalk(n_cw)
+                template = cw.get()
+            else:
+                template = self.templates[template_name].copy()
             h, w, _ = template.shape
             dh, dw = int(random.randint(min_h, max_h) / 100 * h), int(random.randint(min_w, max_w) / 100 * w)
             template = resize_template(template, dh, dw)

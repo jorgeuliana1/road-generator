@@ -55,5 +55,9 @@
         "MAX_BLUR" : 5,
         "MAX_CONTRAST" : 20,
         "MAX_BRIGHTNESS" : 20
+    },
+    "CROSSWALKS" : {
+        "MIN" : 4,
+        "MAX" : 7
     }
 }
