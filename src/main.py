@@ -212,7 +212,7 @@ def main():
             filename = "" + DESTINY
             filename = filename[len(DES_FOLDER)+1:]
 
-            tracker = MarkTracker(filename)
+            tracker = MarkTracker(filename, (HEIGHT, WIDTH))
             tracker.addLocation((x0, y0, x1, y1), label)
             sub_trackers.append(tracker)
 

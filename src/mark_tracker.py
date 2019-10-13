@@ -2,12 +2,38 @@ import math
 import numpy as np
 
 class MarkTracker:
-    __filename = ""
-    __location = (0, 0, 0, 0)
-    __label    = ""
+    __filename   = ""
+    __location   = (0, 0, 0, 0)
+    __label      = ""
+    __dimensions = (0, 0)
 
-    def __init__(self, filename):
+    def __init__(self, filename, dimensions):
         self.__filename = filename
+        self.__h, self.__w = dimensions
+
+    def __correct_coordinates(self):
+        h, w = self.__h, self.__w
+        x0, y0, x1, y1 = self.__location
+
+        # Correcting the coordinates:
+        if x0 < 0:
+            x0 = 0
+        if x1 < 0:
+            x1 = 0
+        if y0 < 0:
+            y0 = 0
+        if y1 < 0:
+            y1 = 0
+        if x0 > w:
+            x0 = w
+        if x1 > w:
+            x1 = w
+        if y0 > h:
+            y0 = h
+        if y1 > h:
+            y1 = h
+
+        self.__location = x0, y0, x1, y1
 
     def addLocation(self, location, m_class):
         self.__location = location
@@ -29,6 +55,7 @@ class MarkTracker:
         return self.__label
 
     def getLocation(self):
+        self.__correct_coordinates()
         return self.__location
 
     def move(self, dx, dy):
