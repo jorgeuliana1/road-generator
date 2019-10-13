@@ -12,6 +12,16 @@ def get_bg_from_image(dimensions, image_path):
 
     return cv2.resize(img, dimensions, interpolation=cv2.INTER_AREA)
 
+def load_image(dimensions, image_path):
+    WIDTH, HEIGHT = dimensions
+    img = cv2.imread(image_path, cv2.IMREAD_COLOR)
+
+    # Convert the image from RGB2RGBA
+    if len(img.shape) > 2 and img.shape[2] == 3:
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
+
+    return cv2.resize(img, dimensions, interpolation=cv2.INTER_AREA)
+
 def get_template_from_image(dimensions, image_path):
     template = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
     h, w, _ = template.shape

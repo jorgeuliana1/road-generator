@@ -58,14 +58,12 @@ class RoadImage:
         return random_key
 
     def randomBackground(self): # Returns a random background name
-        background_names = tuple(self.backgrounds.keys())
-        random_key = background_names[random.randint(0,len(background_names) - 1)]
-        return random_key
+        backgrounds = self.backgrounds
+        return backgrounds[random.randint(0, len(backgrounds) - 1)]
 
     def randomGround(self):
-        ground_names = tuple(self.grounds.keys())
-        random_key = ground_names[random.randint(0,len(ground_names) - 1)]
-        return random_key
+        grounds = self.grounds
+        return grounds[random.randint(0, len(grounds) - 1)]
 
     def getRotation(self, minx, maxx, miny, maxy, minz, maxz):
 

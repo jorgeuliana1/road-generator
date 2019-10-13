@@ -33,6 +33,8 @@ class Lane:
 
         # Correcting shift and template dimensions (if necessary):
         template = self.correctDimensions(template, dx=x, dy=y)
+        if template is False:
+            return False
         x0, y0, x1, y1 = self.correctShift(template, x, y)
 
         try:
@@ -89,7 +91,7 @@ class Lane:
         right_limit = self.x0 + self.w - x_dist
         left_limit = right_limit - width
         return self.drawSeparator(layer, right_limit, left_limit, width=width, color=color, dotted=dotted, dot_size=dot_size, dot_distance=dot_distance, x_dist=x_dist)
-
+        
     def drawLeftSeparator(self, layer, width=3, color=(255, 255, 255), dotted=False, dot_size=3, dot_distance=1, x_dist=0):
         left_limit = self.x0 + x_dist
         right_limit = left_limit + width
@@ -174,6 +176,8 @@ class Lane:
             y1 = int(self.h * 0.9)
 
         # Resizing template
-        template = cv2.resize(template, (x1-x0, y1-y0), interpolation=cv2.INTER_AREA)
-
-        return template
+        try:
+            template = cv2.resize(template, (x1-x0, y1-y0), interpolation=cv2.INTER_AREA)
+            return template
+        except:
+            return False

@@ -50,19 +50,9 @@ def load_templates(path, dimensions):
     # This function returns a dict containing the templates.
     return templates
 
-def load_backgrounds(path, dimensions):
+def list_images(path):
     files = os.listdir(path)
-    backgrounds = {}
-
-    for filename in files:
-        full_path = path + "/" + filename
-        background_name = filename.split(".")[0]
-
-        background = get_bg_from_image(dimensions, full_path)
-        backgrounds[background_name] = background
-    
-    # Can be used for ground textures and backgrounds
-    return backgrounds
+    return files.copy()
 
 def generate_outpath(folder_path, name_pattern, image_count, file_extension, max_number):
 
@@ -148,9 +138,9 @@ def main():
     # Loading the roadmarks templates:
     templates = load_templates(TEMPLATES, (WIDTH, HEIGHT))
     # Loading ground textures:
-    ground_textures = load_backgrounds(GROUND_TEXTURES, (WIDTH, HEIGHT))
+    ground_textures = list_images(GROUND_TEXTURES)
     # Loading the backgrounds:
-    backgrounds = load_backgrounds(BACKGROUNDS, (WIDTH, HEIGHT))
+    backgrounds = list_images(BACKGROUNDS)
     # Creating marktrackers list:
     trackers = []
 
@@ -189,11 +179,11 @@ def main():
 
         # Getting random background:
         background_filename = img.randomBackground()
-        bg_img = backgrounds[background_filename]
+        bg_img = load_image((WIDTH, HEIGHT), BACKGROUNDS + "/" + background_filename)
 
         # Getting random ground texture:
         ground_texture_filename = img.randomGround()
-        ground_texture = ground_textures[ground_texture_filename]
+        ground_texture = load_image((WIDTH, HEIGHT), GROUND_TEXTURES + "/" + ground_texture_filename)
         
         # Inserting random template:
         template_class = img.randomMark()
