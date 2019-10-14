@@ -59,5 +59,6 @@
     "CROSSWALKS" : {
         "MIN" : 4,
         "MAX" : 7
-    }
+    },
+    "JOBS" : 2
 }
