@@ -1,8 +1,5 @@
-import cv2
+import cv2, math, json, os, sys, random
 import numpy as np
-import math
-import json
-import os
 from mark_tracker import MarkTracker
 from road import Road
 from roadimage import RoadImage
@@ -213,8 +210,10 @@ def main():
     # For information:
     print("Preparing to generate dataset...")
 
+    # Getting settings JSON file's path:
+    settings_path = sys.argv[1] # First argument on command-line
+
     # Opening the JSON file:
-    settings_path = "settings.json" # To change later
     with open(settings_path, 'r') as f:
         json_file = json.load(f)
 
