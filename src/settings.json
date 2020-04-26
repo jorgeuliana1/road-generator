@@ -38,7 +38,7 @@
     "PATHS" : {
         "GROUND_TEXTURES" : "asphalt_textures",
         "TEMPLATES": "templates",
-        "BACKGROUND_IMAGES" : "/dados/tabelini/paper-templates/coco/filtered_640x480",
+        "BACKGROUND_IMAGES" : "backgrounds",
         "DESTINY_FOLDER" : "ds_test",
         "FILENAME_PATTERN" : "image_",
         "FILENAME_EXTENSION" : ".jpg"
@@ -56,5 +56,5 @@
         "MAX_CONTRAST" : 20,
         "MAX_BRIGHTNESS" : 20
     },
-    "JOBS" : 70
+    "JOBS" : 2
 }

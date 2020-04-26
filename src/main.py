@@ -53,12 +53,10 @@ def list_images(path):
     return files.copy()
 
 def generate_outpath(folder_path, name_pattern, image_count, file_extension, max_number):
-
-    if not os.path.isdir(folder_path):
-        os.mkdir(folder_path)
-
-    if not os.path.isdir(folder_path+"/images"):
-        os.mkdir(folder_path+"/images")
+    
+    # Creating images_path (if it doesn't exist):
+    images_path = os.path.join(folder_path, "images")
+    os.makedirs(images_path, exist_ok=True)
     
     # Generating image number:
     max_number_decimals = len(str(max_number))
@@ -232,16 +230,21 @@ def main():
 
     # Loading the roadmarks templates:
     templates = load_templates(TEMPLATES, (WIDTH, HEIGHT))
+
     # Loading ground textures:
     ground_textures = list_images(GROUND_TEXTURES)
+
     # Loading the backgrounds:
     backgrounds = list_images(BACKGROUNDS)
+
+    # Creating the output directory (if it doesn't exists):
+    os.makedirs(DES_FOLDER, exist_ok=True)
     
     # Deleting csv file (if it exists):
-    csv_filename = "annotations.csv"
+    csv_filename = "annotations.csv" 
     dest_folder  = os.listdir(DES_FOLDER)
     if csv_filename in dest_folder:
-        os.remove(DES_FOLDER+"/"+csv_filename)
+        os.remove(os.path.join(dest_folder, csv_filename))
 
     # Multicore processing:
     Parallel(n_jobs=JOBS)(delayed(generate_image)(json_file, i, templates, ground_textures, backgrounds, NUMI) for i in range(NUMI))
