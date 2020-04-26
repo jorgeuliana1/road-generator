@@ -237,7 +237,7 @@ def main():
     # Loading the backgrounds:
     backgrounds = list_images(BACKGROUNDS)
 
-    # Creating the output directory (if it doesn't exists):
+    # Creating the output directory (if it doesn't exist):
     os.makedirs(DES_FOLDER, exist_ok=True)
     
     # Deleting csv file (if it exists):
