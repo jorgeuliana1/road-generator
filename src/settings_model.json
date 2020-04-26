@@ -1,7 +1,7 @@
 {
     "IMAGE_DIMENSIONS" : {
-        "WIDTH" : 1280,
-        "HEIGHT" : 960
+        "WIDTH" : 480,
+        "HEIGHT" : 320
     },
     "ROAD_SETTINGS" : {
         "DIVISIONS" : {
@@ -12,14 +12,14 @@
         "VARIATION" : 20
     },
     "SEP_SETTINGS" : {
-        "MIN_WID" : 8,
-        "MAX_WID" : 16,
-        "MIN_DOT_SIZ" : 32,
-        "MAX_DOT_SIZ" : 128,
+        "MIN_WID" : 2,
+        "MAX_WID" : 5,
+        "MIN_DOT_SIZ" : 20,
+        "MAX_DOT_SIZ" : 50,
         "MIN_DOT_DIS" : 0,
-        "MAX_DOT_DIS" : 32,
+        "MAX_DOT_DIS" : 10,
         "MIN_XDIST" : 0,
-        "MAX_XDIST" : 16
+        "MAX_XDIST" : 3
     },
     "IMAGE_ROTATION" : {
         "MAX_X" : -47,
@@ -30,16 +30,16 @@
         "MIN_Z" : 0
     },
     "TEMPLATE_RESIZE" : {
-        "MAX_H" : 480,
-        "MIN_H" : 124,
-        "MAX_W" : 480,
-        "MIN_W" : 124
+        "MAX_H" : 160,
+        "MIN_H" : 80,
+        "MAX_W" : 160,
+        "MIN_W" : 80
     },
     "PATHS" : {
         "GROUND_TEXTURES" : "asphalt_textures",
         "TEMPLATES": "templates",
-        "BACKGROUND_IMAGES" : "/dados/tabelini/paper-templates/coco/filtered_640x480",
-        "DESTINY_FOLDER" : "ds_test",
+        "BACKGROUND_IMAGES" : "backgrounds",
+        "DESTINY_FOLDER" : "generated_dataset",
         "FILENAME_PATTERN" : "image_",
         "FILENAME_EXTENSION" : ".jpg"
     },
@@ -50,11 +50,15 @@
         "MIN_Y" : -100
     },
     "SEED" : 0,
-    "IMAGES" : 70,
+    "IMAGES" : 50,
     "IMAGE_TRANSFORM" : {
-        "MAX_BLUR" : 7,
+        "MAX_BLUR" : 5,
         "MAX_CONTRAST" : 20,
         "MAX_BRIGHTNESS" : 20
     },
-    "JOBS" : 70
+    "CROSSWALKS" : {
+        "MIN" : 4,
+        "MAX" : 7
+    },
+    "JOBS" : 2
 }
