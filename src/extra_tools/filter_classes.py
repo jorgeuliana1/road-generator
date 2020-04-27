@@ -19,18 +19,16 @@ def import_annotations(annotations_path):
 
     return annotations
 
-def import_classes(classes_path):
+def import_classes(classes_path, classes_to_keep):
+
     # Opening file
     with open(classes_path, "r") as f:
             classes_json = json.load(f)
     
     classes_list = list(classes_json.keys())
 
-    # Filtering the classes list:
-    if "__background__" in classes_list:
-        classes_list.remove("__background__")
-
-    return classes_list
+    # Returns only classes that will be kept
+    return [ c for c in classes_list if c in classes_to_keep ]
 
 def annotation_to_line(annotation):
     return "{},{},{},{},{},{}".format(annotation["path"],
@@ -74,15 +72,22 @@ def dump(annotations, classes, output_dir):
     annotations_path = os.path.join(output_dir, "annotations.csv")
     classes_path = os.path.join(output_dir, "classes.json")
     
+    # Dumping annotations.csv:
     with open(annotations_path, "w") as f:
         for annotation in annotations:
             f.write(annotation_to_line(annotation))
             if annotation != annotations[-1]: f.write("\n")
 
+    # Dumping classes.json:
+    classes_dict = {}
+    for i in range(len(classes)):
+        classes_dict[classes[i]] = i
+    with open(classes_path, "w") as classes_json:
+        classes_json.write(json.dumps(classes_dict, indent=2))
+
 args = arguments()
-print(args)
 annotations = import_annotations(args["annotations_path"])
-classes = import_classes(args["classes_path"])
+classes = import_classes(args["classes_path"], args["keep"])
 
 substitute_in_annotation(annotations, args["substitute_from"], args["substitute_to"])
 annotations = keep_in_annotation(annotations, args["keep"])
