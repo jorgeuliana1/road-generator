@@ -50,7 +50,7 @@ def arguments():
     argparser = argparse.ArgumentParser()
     argparser.add_argument('--output')
     argparser.add_argument('--annotations')
-    argparser.add_argument('--keep')
+    argparser.add_argument('--keep', nargs='+')
     argparser.add_argument('--swap', nargs='+')
     argparser.add_argument('--classes')
     values = vars(argparser.parse_args())
