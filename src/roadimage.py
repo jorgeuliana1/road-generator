@@ -179,7 +179,7 @@ class RoadImage:
 
         return blur, constrast/100, brightness/100
 
-    def getAgingMatrix(self):
+    def getAgingMatrix(self, maxAge):
 
         def getAge(limiter):
             age = random.randint(-limiter, limiter)
@@ -199,7 +199,7 @@ class RoadImage:
         for i in range(0, mh):
             matrix.append([])
             for j in range(0, mw):
-                new = 100 - getAge(50) # How "new/fresh" the finish is
+                new = 100 - getAge(maxAge) # How "new/fresh" the finish is
                 matrix[i].append(new)
 
         return matrix

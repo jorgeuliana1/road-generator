@@ -54,7 +54,8 @@
     "IMAGE_TRANSFORM" : {
         "MAX_BLUR" : 5,
         "MAX_CONTRAST" : 20,
-        "MAX_BRIGHTNESS" : 20
+        "MAX_BRIGHTNESS" : 20,
+        "MAX_AGING" : 100
     },
     "CROSSWALKS" : {
         "MIN" : 4,

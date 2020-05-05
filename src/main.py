@@ -105,6 +105,7 @@ def generate_image(json_file, i, templates, ground_textures, backgrounds, NUMI):
     MAXBLUR = json_file["IMAGE_TRANSFORM"]["MAX_BLUR"]
     MAXCONTRAST = json_file["IMAGE_TRANSFORM"]["MAX_CONTRAST"]
     MAXBRIGHT = json_file["IMAGE_TRANSFORM"]["MAX_BRIGHTNESS"]
+    MAXAGE = json_file["IMAGE_TRANSFORM"]["MAX_AGING"]
 
 
     # Generating the templates layer:
@@ -168,7 +169,7 @@ def generate_image(json_file, i, templates, ground_textures, backgrounds, NUMI):
         sub_trackers.append(tracker)
 
     # Aging roadmarks:
-    age_matrix = img.getAgingMatrix()
+    age_matrix = img.getAgingMatrix(MAXAGE)
     overlay = age_layer(overlay, age_matrix)
 
     # Blending layers:
@@ -244,7 +245,8 @@ def main():
     csv_filename = "annotations.csv" 
     dest_folder  = os.listdir(DES_FOLDER)
     if csv_filename in dest_folder:
-        os.remove(os.path.join(dest_folder, csv_filename))
+        csv_filepath = os.path.join(DES_FOLDER, csv_filename)
+        os.remove(csv_filepath)
 
     # Multicore processing:
     Parallel(n_jobs=JOBS)(delayed(generate_image)(json_file, i, templates, ground_textures, backgrounds, NUMI) for i in range(NUMI))
