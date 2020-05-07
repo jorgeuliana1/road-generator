@@ -182,13 +182,11 @@ class RoadImage:
     def getAgingMatrix(self, maxAge):
 
         def getAge(limiter):
-            age = random.randint(-limiter, limiter)
-            if age < 0:
-                age = 0
-            elif age > 100:
-                age = 100
-
-            return age
+            age = random.randint(-100, 100) * limiter / 100
+            
+            if age > 100: return 100
+            elif age < 0: return 0
+            else: return age
 
         h, w = self.h, self.w
         mw = math.floor(math.sqrt(h))
