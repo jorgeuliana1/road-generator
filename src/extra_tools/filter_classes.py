@@ -60,8 +60,8 @@ def arguments():
             "classes_path" : values['classes'],
             "annotations_path": values['annotations'],
             "keep" : values['keep'],
-            "substitute_from" : values['swap'][0],
-            "substitute_to" : values['swap'][1]
+            #"substitute_from" : values['swap'][0],
+            #"substitute_to" : values['swap'][1]
             }
 
 def dump(annotations, classes, output_dir):
@@ -89,7 +89,7 @@ args = arguments()
 annotations = import_annotations(args["annotations_path"])
 classes = import_classes(args["classes_path"], args["keep"])
 
-substitute_in_annotation(annotations, args["substitute_from"], args["substitute_to"])
+#substitute_in_annotation(annotations, args["substitute_from"], args["substitute_to"])
 annotations = keep_in_annotation(annotations, args["keep"])
 
 dump(annotations, classes, args["output_folder"])

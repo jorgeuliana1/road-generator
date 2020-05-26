@@ -67,10 +67,20 @@ class RoadImage:
 
     def getRotation(self, minx, maxx, miny, maxy, minz, maxz):
 
+        def randomRotation(mind, maxd):
+            multiplier = random.randint(0, 1000) / 1000
+            difference = maxd - mind
+            
+            return multiplier * difference + mind
+
+	# Getting Y and Z rotation signals (positive or negative):
+        ysig = random.sample((-1, 1), 1)[0]
+        zsig = random.sample((-1, 1), 1)[0]
+
         # Getting rotations, in deegrees
-        x = random.randint(minx, maxx)
-        y = random.randint(miny, maxy)
-        z = random.randint(minz, maxz)
+        x = -randomRotation(minx, maxx)
+        y = ysig * randomRotation(miny, maxy)
+        z = zsig * randomRotation(minz, maxz)
 
         # Converting to radians:
         x = x/180.00 * math.pi
