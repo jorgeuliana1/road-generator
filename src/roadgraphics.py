@@ -40,11 +40,11 @@ def blend(background, foreground):
 def transparent_overlay(background, foreground):
     h, w, _ = background.shape
     img = generate_empty_templates_layer((w, h))
-
-    for i in range(h):
-        for j in range(w):
-            alpha = float(foreground[i][j][3] / 255.0)
-            img[i][j] = alpha * foreground[i][j] + (1 - alpha) * background[i][j]
+    background_alpha = np.array(background[:,:,3])
+    alpha_matrix_base = np.array(foreground[:, :, 3] / 255.0).T
+    alpha_matrix = np.array([alpha_matrix_base, alpha_matrix_base, alpha_matrix_base, alpha_matrix_base]).T
+    img[:,:] = np.multiply(foreground[:,:], alpha_matrix) + np.multiply(background[:,:], 1 - alpha_matrix)
+    img[:,:,3] = background_alpha
 
     return img
 
@@ -138,45 +138,24 @@ def resize_template(template, new_h, new_w):
     return cv2.resize(template, (new_h, new_w), interpolation=cv2.INTER_AREA)
 
 def apply_color_distortions(img, bright, contrast):
-    new_image = np.zeros(img.shape, img.dtype)
     alpha = 1 + 2 * contrast
     beta  = 100 * bright
-    for y in range(img.shape[0]):
-        for x in range(img.shape[1]):
-            for c in range(img.shape[2]):
-                new_image[y,x,c] = np.clip(alpha*img[y,x,c] + beta, 0, 255)
+    new_image = np.clip(alpha * img + beta, 0, 255).astype('uint8')
 
     return new_image
 
 def apply_blur(img, blur):
     out = cv2.medianBlur(img, int(blur))
+    iblur = int(blur)
+    out = cv2.GaussianBlur(img, (iblur, iblur), 0)
     return out
 
 def age_layer(layer, age_matrix):
-    def age(layer, age_coef, x0, y0, x1, y1):
-        b, g, r, a = cv2.split(layer)
-        h, w = a.shape
-
-        for i in range(y0, y1):
-            for j in range(x0, x1):
-                a[i][j] = a[i][j] * age_coef
-
-        layer = cv2.merge((b, g, r, a))
-        return layer
 
     lh, lw, _ = layer.shape
-    mh, mw = len(age_matrix), len(age_matrix[0])
-    h, w = math.floor(lh/mh), math.floor(lw/mw)
-    nlayer = layer.copy()
+    new_layer = layer
+    new_layer[:,:,3] = np.multiply(1 - age_matrix, layer[:,:,3])
 
-    for i in range(0, mh):
-        for j in range(0, mw):
-            x0, x1 = j * w, (j + 1) * w
-            y0, y1 = i * h, (i + 1) * h
-
-            age_coef = age_matrix[i][j] / 100
-            nlayer = age(nlayer, age_coef, x0, y0, x1, y1)
-
-    return nlayer
+    return new_layer
 
 

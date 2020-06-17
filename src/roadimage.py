@@ -189,25 +189,10 @@ class RoadImage:
 
         return blur, constrast/100, brightness/100
 
-    def getAgingMatrix(self, maxAge):
-
-        def getAge(limiter):
-            age = random.randint(-100, 100) * limiter / 100
-            
-            if age > 100: return 100
-            elif age < 0: return 0
-            else: return age
+    def getAgingMatrix(self, max_age):
 
         h, w = self.h, self.w
-        mw = math.floor(math.sqrt(h))
-        mh = mw
+        aging_matrix = np.abs(np.random.randn(h, w))
+        aging_matrix = np.clip(aging_matrix, 0, 0.01 * max_age)
 
-        matrix = []
-
-        for i in range(0, mh):
-            matrix.append([])
-            for j in range(0, mw):
-                new = 100 - getAge(maxAge) # How "new/fresh" the finish is
-                matrix[i].append(new)
-
-        return matrix
+        return aging_matrix

@@ -1,7 +1,7 @@
 {
     "IMAGE_DIMENSIONS" : {
-        "WIDTH" : 480,
-        "HEIGHT" : 320
+        "WIDTH" : 640,
+        "HEIGHT" : 480
     },
     "ROAD_SETTINGS" : {
         "DIVISIONS" : {
@@ -22,8 +22,8 @@
         "MAX_XDIST" : 3
     },
     "IMAGE_ROTATION" : {
-        "MAX_X" : -47,
-        "MIN_X" : -80,
+        "MAX_X" : 85,
+        "MIN_X" : 47,
         "MAX_Y" : 0,
         "MIN_Y" : 0,
         "MAX_Z" : 0,
@@ -50,16 +50,16 @@
         "MIN_Y" : -100
     },
     "SEED" : 0,
-    "IMAGES" : 50,
+    "IMAGES" : 16,
     "IMAGE_TRANSFORM" : {
-        "MAX_BLUR" : 5,
+        "MAX_BLUR" : 3,
         "MAX_CONTRAST" : 20,
         "MAX_BRIGHTNESS" : 20,
-        "MAX_AGING" : 100
+        "MAX_AGING" : 60
     },
     "CROSSWALKS" : {
         "MIN" : 4,
         "MAX" : 7
     },
-    "JOBS" : 2
+    "JOBS" : 8
 }
