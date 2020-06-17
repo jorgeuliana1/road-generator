@@ -172,12 +172,16 @@ def generate_image(json_file, i, templates, ground_textures, backgrounds, NUMI):
     age_matrix = img.getAgingMatrix(MAXAGE)
     overlay = age_layer(overlay, age_matrix)
 
-    # Blending layers:
-    output_img = blend(ground_texture, overlay)
-
     # Rotating image:
     r_x, r_y, r_z = img.getRotation(MIN_X, MAX_X, MIN_Y, MAX_Y, MIN_Z, MAX_Z)
-    output_img = rotate(output_img, r_x, r_y, r_z, 0, 0, 0) # Must change later
+    overlay = rotate(overlay, r_x, r_y, r_z, 0, 0, 0)
+    ground_texture = rotate(ground_texture, r_x, r_y, r_z, 0, 0, 0)
+
+    # "Eroding" overlay borders:
+    overlay = blur_borders(overlay)
+
+    # Blending layers:
+    output_img = blend(ground_texture, overlay)
     output_img, y_shift = bring_to_bottom(output_img)
     x_shift = 0
 

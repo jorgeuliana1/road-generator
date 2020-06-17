@@ -135,7 +135,12 @@ def draw_bbox(image, location, color):
     cv2.rectangle(image, (x0, y0), (x1, y1), color, 2)
 
 def resize_template(template, new_h, new_w):
-    return cv2.resize(template, (new_h, new_w), interpolation=cv2.INTER_AREA)
+    old_area = template.shape[0] * template.shape[1]
+    new_area = new_h * new_w
+    if old_area > new_area:
+        return cv2.resize(template, (new_w, new_h), interpolation=cv2.INTER_AREA)
+    else:
+        return cv2.resize(template, (new_w, new_h), interpolation=cv2.INTER_CUBIC)
 
 def apply_color_distortions(img, bright, contrast):
     alpha = 1 + 2 * contrast
@@ -145,10 +150,12 @@ def apply_color_distortions(img, bright, contrast):
     return new_image
 
 def apply_blur(img, blur):
-    out = cv2.medianBlur(img, int(blur))
-    iblur = int(blur)
-    out = cv2.GaussianBlur(img, (iblur, iblur), 0)
+    out = cv2.GaussianBlur(img, (int(blur), int(blur)), 0)
     return out
+
+def blur_borders(img):
+    blur = 1
+    return cv2.GaussianBlur(img, (int(blur), int(blur)), 0)
 
 def age_layer(layer, age_matrix):
 

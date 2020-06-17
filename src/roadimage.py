@@ -158,16 +158,10 @@ class RoadImage:
             template_names = tuple(self.templates.keys())
 
             # Setting up template:
-            crosswalk_name = "FAIXAPEDESTRES"
             template_name  = template_names[templates[i] - 1]
-            if template_name == crosswalk_name:
-                n_cw     = random.randint(4, 7)
-                cw       = CrossWalk(n_cw)
-                template = cw.get()
-            else:
-                template = self.templates[template_name].copy()
-            h, w, _ = template.shape
-            dh, dw = int(random.randint(min_h, max_h) / 100 * h), int(random.randint(min_w, max_w) / 100 * w)
+            template = self.templates[template_name].copy()
+            dh = int(random.randint(0, 100) / 100 * (max_h - min_h) + min_h)
+            dw = int(random.randint(0, 100) / 100 * (max_w - min_w) + min_w)
             template = resize_template(template, dh, dw)
 
             # Getting the result of the insertion

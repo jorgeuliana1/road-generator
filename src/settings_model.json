@@ -23,17 +23,17 @@
     },
     "IMAGE_ROTATION" : {
         "MAX_X" : 85,
-        "MIN_X" : 47,
+        "MIN_X" : 80,
         "MAX_Y" : 0,
         "MIN_Y" : 0,
         "MAX_Z" : 0,
         "MIN_Z" : 0
     },
     "TEMPLATE_RESIZE" : {
-        "MAX_H" : 160,
-        "MIN_H" : 80,
-        "MAX_W" : 160,
-        "MIN_W" : 80
+        "MAX_H" : 256,
+        "MIN_H" : 180,
+        "MAX_W" : 96,
+        "MIN_W" : 64
     },
     "PATHS" : {
         "GROUND_TEXTURES" : "asphalt_textures",
@@ -55,7 +55,7 @@
         "MAX_BLUR" : 3,
         "MAX_CONTRAST" : 20,
         "MAX_BRIGHTNESS" : 20,
-        "MAX_AGING" : 60
+        "MAX_AGING" : 40
     },
     "CROSSWALKS" : {
         "MIN" : 4,
