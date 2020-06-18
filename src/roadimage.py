@@ -157,17 +157,26 @@ class RoadImage:
             road = self.getRoad()
             template_names = tuple(self.templates.keys())
 
+            # Setting "horinzontal templates" info:
+            crosswalk_name = "FAIXAPEDESTRES"
+            retention_name = "RETENCAO"
+            horizontal_templates = [crosswalk_name, retention_name]
+
             # Setting up template:
-            template_name  = template_names[templates[i] - 1]
+            template_name = template_names[templates[i] - 1]
             template = self.templates[template_name].copy()
-            dh = int(random.randint(0, 100) / 100 * (max_h - min_h) + min_h)
-            dw = int(random.randint(0, 100) / 100 * (max_w - min_w) + min_w)
+            if template_name in horizontal_templates:
+                dw = int(layer.shape[0] / n_lanes)
+                dh = int(template.shape[1] / template.shape[0] * dw)
+                # Centering template:
+                x = 0
+            else:
+                dw = int(random.randint(0, 100) / 100 * (max_w - min_w) + min_w)
+                dh = int(random.randint(0, 100) / 100 * (max_h - min_h) + min_h)
             template = resize_template(template, dh, dw)
 
             # Getting the result of the insertion
-            
             result = road.insertTemplateAtLane(layer, template, lanes[i], x=x, y=y)
-
             if result != False:
                 layer, location = result
                 locations.append((location, template_names[templates[i] - 1]))
