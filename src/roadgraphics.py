@@ -1,6 +1,5 @@
 import numpy as np
-import math
-import cv2
+import math, os, cv2
 
 def get_bg_from_image(dimensions, image_path):
     WIDTH, HEIGHT = dimensions
@@ -25,7 +24,19 @@ def load_image(dimensions, image_path):
 def get_template_from_image(dimensions, image_path):
     template = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
     h, w, _ = template.shape
+    
+    # DETERMINING THE USEFUL AREA OF THE IMAGE:
+    # GS_TEMPLATE : GRAYSCALE TEMPLATE
+    black_template = cv2.bitwise_not(template)
+    gs_template = cv2.cvtColor(black_template, cv2.COLOR_BGR2GRAY)
+    gs_template = 255*(gs_template < 128).astype(np.uint8)
+    coords = cv2.findNonZero(gs_template)
+    x, y, w, h = cv2.boundingRect(coords) # Find minimum spanning bounding box
+    old_template = template
+    template = template[y:y+h, x:x+w]
+
     template = cv2.resize(template, (h, w), interpolation=cv2.INTER_AREA)
+
     return template
 
 def generate_empty_templates_layer(dimensions):
@@ -48,8 +59,8 @@ def transparent_overlay(background, foreground):
 
     return img
 
-def rotate(image, theta, phi, gamma, dx, dy, dz):
-    h, w, _ = image.shape
+def get_transformation_matrix(image_shape, theta, phi, gamma, dx, dy, dz):
+    h, w = image_shape
 
     d = np.sqrt(h**2 + w**2)
     focal = d / (2 * np.sin(gamma) if np.sin(gamma) != 0 else 1)
@@ -92,6 +103,11 @@ def rotate(image, theta, phi, gamma, dx, dy, dz):
 
     # Final transformation matrix
     TM = np.dot(A2, np.dot(T, np.dot(R, A1)))
+    
+    return TM
+
+def rotate(image, TM):
+    h, w, _ = image.shape
 
     # Using cv2 to warp the image
     return cv2.warpPerspective(image.copy(), TM, (w, h))
@@ -165,4 +181,16 @@ def age_layer(layer, age_matrix):
 
     return new_layer
 
+def load_templates(path, dimensions):
+    files = os.listdir(path)
+    templates = {}
 
+    for filename in files:
+        full_path = os.path.join(path, filename)
+        template_name = os.path.splitext(filename)[0]
+
+        template = get_template_from_image(dimensions, full_path)
+        templates[template_name] = template
+
+    # This function returns a dict containing the templates.
+    return templates

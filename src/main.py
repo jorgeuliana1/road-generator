@@ -34,20 +34,6 @@ def save_classes(templates, filename, folder):
                 f.write("\n")
         f.write("}")
 
-def load_templates(path, dimensions):
-    files = os.listdir(path)
-    templates = {}
-
-    for filename in files:
-        full_path = path + "/" + filename
-        template_name = filename.split(".")[0]
-
-        template = get_template_from_image(dimensions, full_path)
-        templates[template_name] = template
-
-    # This function returns a dict containing the templates.
-    return templates
-
 def list_images(path):
     files = os.listdir(path)
     return files.copy()
@@ -174,8 +160,9 @@ def generate_image(json_file, i, templates, ground_textures, backgrounds, NUMI):
 
     # Rotating image:
     r_x, r_y, r_z = img.getRotation(MIN_X, MAX_X, MIN_Y, MAX_Y, MIN_Z, MAX_Z)
-    overlay = rotate(overlay, r_x, r_y, r_z, 0, 0, 0)
-    ground_texture = rotate(ground_texture, r_x, r_y, r_z, 0, 0, 0)
+    TM = get_transformation_matrix((HEIGHT, WIDTH), r_x, r_y, r_z, 0, 0, 0)
+    overlay = rotate(overlay, TM)
+    ground_texture = rotate(ground_texture, TM)
 
     # "Eroding" overlay borders:
     overlay = blur_borders(overlay)
@@ -187,7 +174,7 @@ def generate_image(json_file, i, templates, ground_textures, backgrounds, NUMI):
 
     # Updating marktrackers:
     for t in sub_trackers:
-        t.applyPerspective(r_x, r_y, r_z, 0, 0, 0, (HEIGHT, WIDTH)) # Must change later
+        t.applyPerspective(TM, (HEIGHT, WIDTH)) # Must change later
         t.move(x_shift, y_shift)
 
     # Final blending:

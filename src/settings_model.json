@@ -22,8 +22,8 @@
         "MAX_XDIST" : 3
     },
     "IMAGE_ROTATION" : {
-        "MAX_X" : 85,
-        "MIN_X" : 80,
+        "MAX_X" : 80,
+        "MIN_X" : 70,
         "MAX_Y" : 0,
         "MIN_Y" : 0,
         "MAX_Z" : 0,
