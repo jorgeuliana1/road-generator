@@ -61,7 +61,6 @@ def generate_image(json_file, i, templates, ground_textures, backgrounds, NUMI):
     HEIGHT = json_file["IMAGE_DIMENSIONS"]["HEIGHT"]
     MAX_LANES = json_file["ROAD_SETTINGS"]["DIVISIONS"]["MAX"]
     MIN_LANES = json_file["ROAD_SETTINGS"]["DIVISIONS"]["MIN"]
-    #LINE_THICKNESS = json_file["ROAD_SETTINGS"]["LINE_THICKNESS"]
     LANE_VARIATION = json_file["ROAD_SETTINGS"]["VARIATION"]
     IMAGE_ROTATION = json_file["IMAGE_ROTATION"]
     MIN_X, MAX_X = IMAGE_ROTATION["MIN_X"], IMAGE_ROTATION["MAX_X"]

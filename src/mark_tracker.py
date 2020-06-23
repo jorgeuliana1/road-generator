@@ -70,59 +70,39 @@ class MarkTracker:
         self.__location = (x0 + dx, y0 + dy, x1 + dx, y1 + dy)
 
     def applyPerspective(self, TM, image_dimensions):
-
-        h, w = image_dimensions
-
         x0, y0, x1, y1 = self.__location
 
-        # Applying the perspective to the points
-        tw = x1 - x0
-        th = y1 - y0
-        P = np.array([[0, tw, tw, 0],
-                      [0, 0, th, th],
-                      [1, 1, 1, 1]])
-        O = np.array([[x0, x1],
-                      [y0, y1],
-                      [1, 1]])
+        # X : vector containing every value of x in the border of the bounding box
+        # Y : vector containing every value of x in the border of the bounding box
 
-        Pl = np.dot(TM, P)
-        Or = np.dot(TM, O)
+        x_values = np.arange(x0, x1, 1)
+        y_values = np.arange(y0, y1, 1)
 
-        newxs = Pl[0, :] / Pl[2, :]
-        newys = Pl[1, :] / Pl[2, :]
-        oxs = Or[0, :] / Or[2, :]
-        oys = Or[1, :] / Or[2, :]
-        x0 = oxs.min()
-        x1 = oxs.max()
-        y0 = oys.min()
-        y1 = oys.max()
-        minnewxs = newxs.min()
-        minnewys = newys.min()
-        maxnewxs = newxs.max()
-        maxnewys = newys.max()
+        left_border_coords = [(x0, yi) for yi in y_values]
+        right_border_coords = [(x1, yi) for yi in y_values]
+        up_border_coords = [(xi, y0) for xi in x_values]
+        down_border_coords = [(xi, y1) for xi in x_values]
 
-        nw = int(math.ceil(maxnewxs)) - int(math.floor(minnewxs))
-        nh = int(math.ceil(maxnewys)) - int(math.floor(minnewys))
+        border_coords = left_border_coords + right_border_coords \
+            + up_border_coords + down_border_coords
 
-        mark_y_bias = int(x0 - w // 2)
-        y_bias_direction = mark_y_bias / abs(mark_y_bias + 0.001)
-        y_bias_intensity = y_bias_direction / w
-        y_offset = nw * y_bias_intensity * 100
-        y_offset = y_offset / np.log(abs(y_offset))
+        m = len(border_coords)
+        X = np.array([p[0] for p in border_coords])
+        Y = np.array([p[1] for p in border_coords])
 
-        hnw = (nw / 2)
-        hnh = (nh / 2)
+        # C_original : matrix of the original coordinates
 
-        xc = (x0 + x1)/2
+        C_original = np.array([X, Y, np.ones((m), dtype=int)])
+        
+        # C_perspective : matrix of the coordinates after the perspective was applied
+        # X_perspective : X vector after the perspective was applied
+        # Y_perspective : Y vector after the perspective was applied
 
-        x0 = xc - hnw
-        x1 = xc + hnw
+        C_perspective = TM.dot(C_original)
+        X_perspective = C_perspective[0,:] / C_perspective[2,:]
+        Y_perspective = C_perspective[1,:] / C_perspective[2,:]
+        
+        x0, y0 = X_perspective.min(), Y_perspective.min()
+        x1, y1 = X_perspective.max(), Y_perspective.max()
 
-        if y_bias_direction > 0:
-            x0 -= y_offset
-            x1 += y_offset
-        elif y_bias_direction < 0:
-            x1 -= y_offset
-            x0 += y_offset
-
-        self.__location = (int(x0), int(y0), int(x1), int(y1))
+        self.__location = int(x0), int(y0), int(x1), int(y1)
