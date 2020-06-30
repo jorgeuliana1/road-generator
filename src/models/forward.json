@@ -1,0 +1,20 @@
+{
+    "label" : "FRENTE",
+    "subarrows" : [
+        {
+            "rotation" : 0,
+            "delta_x" : 0,
+            "delta_y" : 0,
+            "has_head" : true,
+            "has_body" : true,
+            "head" : {
+                "height" : 0.3,
+                "width" : 0.3
+            },
+            "body" : {
+                "height" : 0.5,
+                "width" : 0.125
+            }
+        }
+    ]
+}

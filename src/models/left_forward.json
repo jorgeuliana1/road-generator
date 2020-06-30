@@ -1,0 +1,35 @@
+{
+    "label" : "FRENTEESQUERDA",
+    "subarrows" : [
+        {
+            "rotation" : -60,
+            "delta_x" : -0.6,
+            "delta_y" : 0.575,
+            "has_head" : true,
+            "has_body" : true,
+            "head" : {
+                "height" : 0.25,
+                "width" : 0.25
+            },
+            "body" : {
+                "height" : 0.25,
+                "width" : 0.10
+            }
+        },
+        {
+            "rotation" : 0,
+            "delta_x" : 0,
+            "delta_y" : 0,
+            "has_head" : true,
+            "has_body" : true,
+            "head" : {
+                "height" : 0.3,
+                "width" : 0.3
+            },
+            "body" : {
+                "height" : 0.7,
+                "width" : 0.15
+            }
+        }
+    ]
+}

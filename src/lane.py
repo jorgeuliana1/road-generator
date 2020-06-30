@@ -9,19 +9,18 @@ class Lane:
         # x0 is the upper left vertex of the lane
         self.h, self.w = h, w
         # h and w are height and width
+
     def getAbsoluteCoordinates(self, x, y):
         # (0, 0) is the center of the lane
         
         # Finding the absolute coordinates of the center:
-        xc, yc = self.x0 + self.w/2.00, self.h/2.00
+        xc, yc = self.x0 + self.w // 2, self.h // 2
 
         # Finding the x and y in absolute coordinates:
         xa, ya = xc + x, yc + y
 
-        # Rounding:
-        xa, ya = int(xa), int(ya)
-
         return xa, ya
+
     def insertTemplate(self, layer, template, x, y):
         # x and y are the coordinates related to the center of the template
 
@@ -44,7 +43,7 @@ class Lane:
             new_layer[y0:y1, x0:x1] = template
 
             # Returning template location:
-            return new_layer, ((x0, y0), (x1, y1))
+            return layer, ((x0, y0), (x1, y1))
 
         except:
             
@@ -139,7 +138,31 @@ class Lane:
 
         return x0, y0, x1, y1
 
+    def correct_displacement(self, template, dx, dy):
+        x0, y0, x1, y1 = template.bounding_box
+        t_w, t_h = x1 - x0, y1 - y0
+        x0, y0, x1, y1 = x0 + dx, y0 + dy, x1 + dx, y1 + dy
+
+        # Correcting shift:
+        if x1 > self.x0 + self.w:
+            x1 = self.x0 + self.w
+            x0 = x1 - t_w
+        if x0 < self.x0:
+            x0 = self.x0
+            x1 = x0 + t_w
+        if y1 > self.h:
+            y1 = self.h
+            y0 = y1 - t_h
+        if y0 < 0:
+            y0 = 0
+            y1 = t_h
+
+        return x0, y0, x1, y1
+
+
     def correctShift(self, template, dx, dy):
+
+        # LEGACY
 
         t_h, t_w, _ = template.shape
 
@@ -161,7 +184,10 @@ class Lane:
 
         return x0, y0, x1, y1
 
+
     def correctDimensions(self, template, dx=0, dy=0):
+
+        # LEGACY
         
         t_h, t_w, _ = template.shape
 

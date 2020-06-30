@@ -6,6 +6,7 @@ from roadimage import RoadImage
 from roadgraphics import *
 import random
 from joblib import Parallel, delayed
+import drawings as drw
 
 def show_image(image):
     cv2.imshow('image', image)
@@ -20,8 +21,18 @@ def fill_csv(trackers, title, path):
         for t in trackers:
             f.write(t.getString()+"\n")
 
+def fill_csv_alternate(imagepath, templates, folder, filename):
+    csv_path = os.path.join(folder, filename)
+    with open(csv_path, "a+") as f:
+        for template in templates:
+            x0, y0, x1, y1 = map(lambda i : max(0, i), template.bounding_box)
+            label = template.label
+            _, imagename = os.path.split(imagepath)
+            csv_line = f"images/{imagename},{x0},{y0},{x1},{y1},{label}\n"
+            f.write(csv_line)
+
 def save_classes(templates, filename, folder):
-    t_labels = list(templates.keys())
+    t_labels = list(templates.labels)
     t_labels.insert(0, "__background__")
 
     with open(folder+"/"+filename, "w") as f:
@@ -54,7 +65,7 @@ def generate_outpath(folder_path, name_pattern, image_count, file_extension, max
     # Returning the path:
     return folder_path + "/images/" + name_pattern + count_str + file_extension
 
-def generate_image(json_file, i, templates, ground_textures, backgrounds, NUMI):
+def generate_image(json_file, i, templates_collection, ground_textures, backgrounds, NUMI):
     
     # Getting the parameters from the JSON file:
     WIDTH = json_file["IMAGE_DIMENSIONS"]["WIDTH"]
@@ -73,7 +84,6 @@ def generate_image(json_file, i, templates, ground_textures, backgrounds, NUMI):
     TR_MINW = TEMPLATE_RESIZE["MIN_W"]
     PATHS = json_file["PATHS"]
     GROUND_TEXTURES = PATHS["GROUND_TEXTURES"]
-    TEMPLATES = PATHS["TEMPLATES"]
     BACKGROUNDS = PATHS["BACKGROUND_IMAGES"]
     DES_FOLDER = PATHS["DESTINY_FOLDER"]
     FN_PATTERN = PATHS["FILENAME_PATTERN"]
@@ -92,7 +102,6 @@ def generate_image(json_file, i, templates, ground_textures, backgrounds, NUMI):
     MAXBRIGHT = json_file["IMAGE_TRANSFORM"]["MAX_BRIGHTNESS"]
     MAXAGE = json_file["IMAGE_TRANSFORM"]["MAX_AGING"]
 
-
     # Generating the templates layer:
     overlay = generate_empty_templates_layer((WIDTH, HEIGHT))
 
@@ -103,12 +112,9 @@ def generate_image(json_file, i, templates, ground_textures, backgrounds, NUMI):
         set_seed = True
     else:
         set_seed = False
-    img = RoadImage((WIDTH, HEIGHT), "", backgrounds, ground_textures, templates, set_seed=set_seed)
+    img = RoadImage((WIDTH, HEIGHT), "", backgrounds, ground_textures, templates_collection, set_seed=set_seed)
     if i == 0:
         img.setSeed(SEED)
-
-    # Creating the marktrackers sublist:
-    sub_trackers = []
 
     # Defining the lanes in the road
     img.defineLanes(MIN_LANES, MAX_LANES, LANE_VARIATION)
@@ -133,48 +139,39 @@ def generate_image(json_file, i, templates, ground_textures, backgrounds, NUMI):
     ground_texture = load_image((WIDTH, HEIGHT), GROUND_TEXTURES + "/" + ground_texture_filename)
     
     # Inserting random template:
-    template_class = img.randomMark()
-    sample_template = templates[template_class]
-    lane_index = img.getRandomLane()
     x_offset, y_offset = img.getShift(MINCX, MAXCX, MINCY, MAXCY)
-    overlay, template_locations = img.insertTemplatesAtLanes(overlay, x=x_offset, y=y_offset, min_w=TR_MINW, max_w=TR_MAXW, min_h=TR_MINH, max_h=TR_MAXH)
-
-    # Creating marktrackers:
-    for i in template_locations:
-        p, label = i
-        p1, p2 = p
-        x0, y0 = p1
-        x1, y1 = p2
-
-        filename = "" + DESTINY
-        filename = filename[len(DES_FOLDER)+1:]
-
-        tracker = MarkTracker(filename, (HEIGHT, WIDTH))
-        tracker.addLocation((x0, y0, x1, y1), label)
-        sub_trackers.append(tracker)
-
-    # Aging roadmarks:
-    age_matrix = img.getAgingMatrix(MAXAGE)
-    overlay = age_layer(overlay, age_matrix)
+    templates_objs = img.insert_templates_at_lanes(x_offset, y_offset, TR_MINH, TR_MAXH, TR_MINW, TR_MAXW)
 
     # Rotating image:
     r_x, r_y, r_z = img.getRotation(MIN_X, MAX_X, MIN_Y, MAX_Y, MIN_Z, MAX_Z)
+    
     TM = get_transformation_matrix((HEIGHT, WIDTH), r_x, r_y, r_z, 0, 0, 0)
     overlay = rotate(overlay, TM)
     ground_texture = rotate(ground_texture, TM)
+    
 
-    # "Eroding" overlay borders:
+    # Bringing to the bottom:
+    ground_texture, y_shift = bring_to_bottom(ground_texture)
+    overlay, y_shift = bring_to_bottom(overlay)
+    x_shift = 0
+
+    # Rotating templates:
+    for i in range(len(templates_objs)):
+        templates_objs[i] = templates_objs[i].apply_perspective(TM)
+        dx, dy = templates_objs[i].displacement
+        dx, dy = dx + x_shift, dy + y_shift
+        templates_objs[i].displacement = dx, dy
+
+    # Drawing the images into the overlay:
+    overlay = img.draw_templates(overlay, templates_objs)
+    
+    # Aging roadmarks:
+    age_matrix = img.getAgingMatrix(MAXAGE)
+    overlay = age_layer(overlay, age_matrix)
     overlay = blur_borders(overlay)
 
     # Blending layers:
     output_img = blend(ground_texture, overlay)
-    output_img, y_shift = bring_to_bottom(output_img)
-    x_shift = 0
-
-    # Updating marktrackers:
-    for t in sub_trackers:
-        t.applyPerspective(TM, (HEIGHT, WIDTH)) # Must change later
-        t.move(x_shift, y_shift)
 
     # Final blending:
     output_img = blend(bg_img, output_img)
@@ -192,7 +189,7 @@ def generate_image(json_file, i, templates, ground_textures, backgrounds, NUMI):
     images_counter+=1
 
     # Saving trackers csv:
-    fill_csv(sub_trackers, "annotations.csv", DES_FOLDER)
+    fill_csv_alternate(DESTINY, templates_objs, DES_FOLDER, "annotations.csv")
 
 def main():
 
@@ -211,7 +208,6 @@ def main():
     HEIGHT = json_file["IMAGE_DIMENSIONS"]["HEIGHT"]
     PATHS = json_file["PATHS"]
     GROUND_TEXTURES = PATHS["GROUND_TEXTURES"]
-    TEMPLATES = PATHS["TEMPLATES"]
     BACKGROUNDS = PATHS["BACKGROUND_IMAGES"]
     DES_FOLDER = PATHS["DESTINY_FOLDER"]
     NUMI = json_file["IMAGES"]
@@ -220,7 +216,7 @@ def main():
     images_counter = 0 # To generate filename
 
     # Loading the roadmarks templates:
-    templates = load_templates(TEMPLATES, (WIDTH, HEIGHT))
+    arrows_collection = drw.ArrowCollection(PATHS["MODELS"])
 
     # Loading ground textures:
     ground_textures = list_images(GROUND_TEXTURES)
@@ -239,9 +235,9 @@ def main():
         os.remove(csv_filepath)
 
     # Multicore processing:
-    Parallel(n_jobs=JOBS)(delayed(generate_image)(json_file, i, templates, ground_textures, backgrounds, NUMI) for i in range(NUMI))
+    Parallel(n_jobs=JOBS)(delayed(generate_image)(json_file, i, arrows_collection, ground_textures, backgrounds, NUMI) for i in range(NUMI))
     
-    save_classes(templates, "classes.json", DES_FOLDER)
+    save_classes(arrows_collection, "classes.json", DES_FOLDER)
     print("Dataset generated successfully.")
 
 if __name__ == "__main__":

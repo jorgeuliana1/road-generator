@@ -1,0 +1,65 @@
+{
+    "label" : "FAIXAPEDESTRES",
+    "subarrows" : [
+        {
+            "rotation" : 0,
+            "delta_x" : -0.35,
+            "delta_y" : -0.25,
+            "has_head" : false,
+            "has_body" : true,
+            "head" : {
+                "height" : 0,
+                "width" : 0
+            },
+            "body" : {
+                "height" : 0.5,
+                "width" : 0.15
+            }
+        },
+        {
+            "rotation" : 0,
+            "delta_x" : -0.10,
+            "delta_y" : -0.25,
+            "has_head" : false,
+            "has_body" : true,
+            "head" : {
+                "height" : 0.5,
+                "width" : 0
+            },
+            "body" : {
+                "height" : 0.5,
+                "width" : 0.15
+            }
+        },
+        {
+            "rotation" : 0,
+            "delta_x" : 0.15,
+            "delta_y" : -0.25,
+            "has_head" : false,
+            "has_body" : true,
+            "head" : {
+                "height" : 0,
+                "width" : 0
+            },
+            "body" : {
+                "height" : 0.5,
+                "width" : 0.15
+            }
+        },
+        {
+            "rotation" : 0,
+            "delta_x" : 0.40,
+            "delta_y" : -0.25,
+            "has_head" : false,
+            "has_body" : true,
+            "head" : {
+                "height" : 0,
+                "width" : 0
+            },
+            "body" : {
+                "height" : 0.5,
+                "width" : 0.15
+            }
+        }
+    ]
+}

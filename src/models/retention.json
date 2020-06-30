@@ -1,0 +1,20 @@
+{
+    "label" : "RETENCAO",
+    "subarrows" : [
+        {
+            "rotation" : 0,
+            "delta_x" : 0,
+            "delta_y" : -0.4375,
+            "has_head" : false,
+            "has_body" : true,
+            "head" : {
+                "height" : 0,
+                "width" : 0
+            },
+            "body" : {
+                "height" : 0.125,
+                "width" : 1
+            }
+        }
+    ]
+}

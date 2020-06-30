@@ -1,0 +1,35 @@
+{
+    "label" : "DIREITA",
+    "subarrows" : [
+        {
+            "rotation" : 45,
+            "delta_x" : 0.836,
+            "delta_y" : -0.517,
+            "has_head" : true,
+            "has_body" : true,
+            "head" : {
+                "height" : 0.3,
+                "width" : 0.3
+            },
+            "body" : {
+                "height" : 0.2,
+                "width" : 0.125
+            }
+        },
+        {
+            "rotation" : 0,
+            "delta_x" : 0,
+            "delta_y" : 0,
+            "has_head" : false,
+            "has_body" : true,
+            "head" : {
+                "height" : 0,
+                "width" : 0
+            },
+            "body" : {
+                "height" : 0.5,
+                "width" : 0.125
+            }
+        }
+    ]
+}

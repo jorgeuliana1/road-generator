@@ -4,15 +4,16 @@ from roadgraphics import *
 from crosswalk import CrossWalk
 import random
 import math
+import drawings as drw
 
 class RoadImage:
-    def __init__(self, dimensions, path, background_images, asphalt_textures, templates, seed=0, set_seed=True):
+    def __init__(self, dimensions, path, background_images, asphalt_textures, templates_collection, seed=0, set_seed=True):
         self.w, self.h = dimensions
         self.path = path # Where the image will be saved
         self.road = Road(self.w, self.h)
 
         # Defining the dictionaries containing random images
-        self.templates = templates
+        self.templates_collection = templates_collection
         self.backgrounds = background_images
         self.grounds = asphalt_textures
 
@@ -92,8 +93,8 @@ class RoadImage:
     
     def getShift(self, minx, maxx, miny, maxy):
         # Getting shifts, in pixels
-        x = random.randint(minx, maxx)
-        y = random.randint(miny, maxy)
+        x = random.randint(0, 100) / 100 * (maxx - minx) + minx
+        y = random.randint(0, 100) / 100 * (maxy - miny) + miny
 
         return (x, y)        
 
@@ -133,55 +134,42 @@ class RoadImage:
     def getLanesNumber(self):
         return self.number_of_lanes
 
-    def insertTemplatesAtLanes(self, layer, x=0, y=0, max_h=100, min_h=100, max_w=100, min_w=100):
-        # Creating insertion lists:
-        lanes = []
+    def insert_templates_at_lanes(self, delta_x, delta_y, min_h, max_h, min_w, max_w):
+        """
+        min_h, max_h, min_w and max_w are proportions, they must be between 0 and 1
+        delta_x and delta_y are proportions, they must be between 0 and 1
+        """
+        labels = self.templates_collection.labels
+        m = len(labels) # m : number of loaded templates.
+        road = self.getRoad()
+        # L is a vector which each index represents a lane in the road:
+        L = [math.ceil(m * random.randint(0, 100) / 100) for i in range(self.number_of_lanes)]
+        # Creating one empty lane:
+        if len(L) > 1:
+            L[int(random.randint(0, 100) / 100) * (len(L)) - 1] = -1 # -1 means that there will be no template at that lane.
+        # Defining the exact position and vectors of the to-be-inserted templates:
         templates = []
+        for l in range(len(L)):
+            Ln = L[l] - 1
+            if Ln == -1: continue # Skipping the "supposed-to-be-empty" lanes
+            lane = road.lanes[l]
+            # Defining the template's dimensions:
+            min_size = (min_h + min_w) / 2 * lane.w
+            max_size = (max_h + max_w) / 2 * lane.w
+            base_siz = random.randint(0, 100) / 100 * (max_size - min_size) + min_size
+            base_dim = (int(base_siz), int(base_siz))
+            # Getting the template vector:
+            template = self.templates_collection.get(labels[Ln], base_dim)
+            # Inserting the template at the lane:
+            dx, dy = lane.getAbsoluteCoordinates(int(delta_x * lane.w), int(delta_y * lane.h))
+            template.displacement = dx, dy
+            templates.append(template)
+        return templates
 
-        # Selecting the number of lanes that will not be empty:
-        n_lanes = random.randint(-self.number_of_lanes, self.number_of_lanes)
-        n_lanes = abs(n_lanes) # This makes it harder to have 0 lanes
-
-        # Selecting the lanes that will be filled and the content:
-        for i in range(n_lanes):
-            j = self.getRandomLane()
-            while j in set(lanes):
-                j = self.getRandomLane()
-                continue
-            lanes.append(j)
-            templates.append(random.randint(0, len(self.templates)))
-
-        # Filling lanes
-        locations = []
-        for i in range(len(lanes)):
-            road = self.getRoad()
-            template_names = tuple(self.templates.keys())
-
-            # Setting "horinzontal templates" info:
-            crosswalk_name = "FAIXAPEDESTRES"
-            retention_name = "RETENCAO"
-            horizontal_templates = [crosswalk_name, retention_name]
-
-            # Setting up template:
-            template_name = template_names[templates[i] - 1]
-            template = self.templates[template_name].copy()
-            if template_name in horizontal_templates:
-                dw = int(layer.shape[0] / n_lanes)
-                dh = int(template.shape[1] / template.shape[0] * dw)
-                # Centering template:
-                x = 0
-            else:
-                dw = int(random.randint(0, 100) / 100 * (max_w - min_w) + min_w)
-                dh = int(random.randint(0, 100) / 100 * (max_h - min_h) + min_h)
-            template = resize_template(template, dh, dw)
-
-            # Getting the result of the insertion
-            result = road.insertTemplateAtLane(layer, template, lanes[i], x=x, y=y)
-            if result != False:
-                layer, location = result
-                locations.append((location, template_names[templates[i] - 1]))
-        
-        return layer, locations
+    def draw_templates(self, img, templates):
+        for template in templates:
+            img = template.draw(img, (255, 255, 255, 255))
+        return img
 
     def getTransform(self, maxblur, maxconstrast, maxbrightness):
         constrast = random.randint(0, maxconstrast)
