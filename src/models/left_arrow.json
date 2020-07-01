@@ -2,18 +2,18 @@
     "label" : "ESQUERDA",
     "subarrows" : [
         {
-            "rotation" : -45,
-            "delta_x" : -0.5425,
-            "delta_y" : 0.191,
+            "rotation" : -60,
+            "delta_x" : -0.592,
+            "delta_y" : 0.566,
             "has_head" : true,
             "has_body" : true,
             "head" : {
-                "height" : 0.3,
-                "width" : 0.3
+                "height" : 0.25,
+                "width" : 0.25
             },
             "body" : {
-                "height" : 0.2,
-                "width" : 0.125
+                "height" : 0.25,
+                "width" : 0.10
             }
         },
         {
@@ -23,12 +23,12 @@
             "has_head" : false,
             "has_body" : true,
             "head" : {
-                "height" : 0,
-                "width" : 0
+                "height" : 0.25,
+                "width" : 0.2
             },
             "body" : {
-                "height" : 0.5,
-                "width" : 0.125
+                "height" : 0.41,
+                "width" : 0.1
             }
         }
     ]

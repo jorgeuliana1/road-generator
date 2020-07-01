@@ -1,0 +1,48 @@
+{
+    "image" : {
+        "width" : 640,
+        "height" : 480,
+        "rotation" : {
+            "x" : [75, 80],
+            "y" : [0, 0],
+            "z" : [0, 0]
+        },
+        "effects" : {
+            "blur" : [0, 3],
+            "contrast" : [0, 20],
+            "brightness" : [0, 20],
+            "aging" : [0, 60]
+        }
+    },
+    "road" : {
+        "lanes" : {
+            "amount" : [2, 3],
+            "width_variation" : 3
+        },
+        "lines" : {
+            "width" : [6, 8],
+            "section_size" : [120, 240],
+            "section_distance" : [120, 240],
+            "sublines_distance" : [0, 0]
+        }
+    },
+    "templates" : {
+        "proportion" : [0.4, 1],
+        "delta_x" : [-0.00, 0.00],
+        "delta_y" : [-0.05, 0.05]
+    },
+    "dataset" : {
+        "title" : "generated_dataset",
+        "length" : 48,
+        "elements_paths" : {
+            "backgrounds" : "backgrounds",
+            "ground_textures" : "asphalt_textures",
+            "models" : "models/collection.json"
+        },
+        "filename_pattern" : "image_{}.jpg"
+    },
+    "processing" : {
+        "seed" : 0,
+        "jobs" : 8
+    }
+}

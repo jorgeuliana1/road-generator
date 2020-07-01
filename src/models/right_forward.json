@@ -23,12 +23,12 @@
             "has_head" : true,
             "has_body" : true,
             "head" : {
-                "height" : 0.3,
-                "width" : 0.3
+                "height" : 0.25,
+                "width" : 0.2
             },
             "body" : {
-                "height" : 0.7,
-                "width" : 0.15
+                "height" : 0.75,
+                "width" : 0.1
             }
         }
     ]
