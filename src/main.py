@@ -68,39 +68,37 @@ def generate_outpath(folder_path, name_pattern, image_count, file_extension, max
 def generate_image(json_file, i, templates_collection, ground_textures, backgrounds, NUMI):
     
     # Getting the parameters from the JSON file:
-    WIDTH = json_file["IMAGE_DIMENSIONS"]["WIDTH"]
-    HEIGHT = json_file["IMAGE_DIMENSIONS"]["HEIGHT"]
-    MAX_LANES = json_file["ROAD_SETTINGS"]["DIVISIONS"]["MAX"]
-    MIN_LANES = json_file["ROAD_SETTINGS"]["DIVISIONS"]["MIN"]
-    LANE_VARIATION = json_file["ROAD_SETTINGS"]["VARIATION"]
-    IMAGE_ROTATION = json_file["IMAGE_ROTATION"]
-    MIN_X, MAX_X = IMAGE_ROTATION["MIN_X"], IMAGE_ROTATION["MAX_X"]
-    MIN_Y, MAX_Y = IMAGE_ROTATION["MIN_Y"], IMAGE_ROTATION["MAX_Y"]
-    MIN_Z, MAX_Z = IMAGE_ROTATION["MIN_Z"], IMAGE_ROTATION["MAX_Z"]
-    TEMPLATE_RESIZE = json_file["TEMPLATE_RESIZE"]
-    TR_MAXH = TEMPLATE_RESIZE["MAX_H"]
-    TR_MINH = TEMPLATE_RESIZE["MIN_H"]
-    TR_MAXW = TEMPLATE_RESIZE["MAX_W"]
-    TR_MINW = TEMPLATE_RESIZE["MIN_W"]
-    PATHS = json_file["PATHS"]
-    GROUND_TEXTURES = PATHS["GROUND_TEXTURES"]
-    BACKGROUNDS = PATHS["BACKGROUND_IMAGES"]
-    DES_FOLDER = PATHS["DESTINY_FOLDER"]
-    FN_PATTERN = PATHS["FILENAME_PATTERN"]
-    F_EXTENSION = PATHS["FILENAME_EXTENSION"]
-    POS = json_file["MARKPOS_VARIATION"]
-    MINCX, MAXCX = POS["MIN_X"], POS["MAX_X"]
-    MINCY, MAXCY = POS["MIN_Y"], POS["MAX_Y"]
-    SEP = json_file["SEP_SETTINGS"]
-    MINS_WID, MAXS_WID = SEP["MIN_WID"], SEP["MAX_WID"]
-    MIND_SIZ, MAXD_SIZ = SEP["MIN_DOT_SIZ"], SEP["MAX_DOT_SIZ"]
-    MIND_DIS, MAXD_DIS = SEP["MIN_DOT_DIS"], SEP["MAX_DOT_DIS"]
-    MIN_XDIS, MAX_XDIS = SEP["MIN_XDIST"], SEP["MAX_XDIST"]
-    SEED = json_file["SEED"]
-    MAXBLUR = json_file["IMAGE_TRANSFORM"]["MAX_BLUR"]
-    MAXCONTRAST = json_file["IMAGE_TRANSFORM"]["MAX_CONTRAST"]
-    MAXBRIGHT = json_file["IMAGE_TRANSFORM"]["MAX_BRIGHTNESS"]
-    MAXAGE = json_file["IMAGE_TRANSFORM"]["MAX_AGING"]
+    image_info = json_file["image"]
+    dataset_info = json_file["dataset"]
+    road_info = json_file["road"]
+    templates_info = json_file["templates"]
+    elements_paths = dataset_info["elements_paths"]
+    image_rotation = image_info["rotation"]
+    roadlines_info = road_info["lines"]
+    fx_info = image_info["effects"]
+    WIDTH, HEIGHT = image_info["width"],  image_info["height"]
+    MIN_LANES, MAX_LANES = road_info["lanes"]["amount"]
+    LANE_VARIATION = road_info["lanes"]["width_variation"]
+    MIN_X, MAX_X = image_rotation["x"]
+    MIN_Y, MAX_Y = image_rotation["y"]
+    MIN_Z, MAX_Z = image_rotation["z"]
+    TR_MINH, TR_MAXH = templates_info["proportion"]
+    TR_MINW, TR_MAXW = templates_info["proportion"]
+    GROUND_TEXTURES = elements_paths["ground_textures"]
+    BACKGROUNDS = elements_paths["backgrounds"]
+    DES_FOLDER = dataset_info["title"]
+    FN_PATTERN, F_EXTENSION = dataset_info["filename_pattern"].split("{}")
+    MINCX, MAXCX = templates_info["delta_x"]
+    MINCY, MAXCY = templates_info["delta_y"]
+    MINS_WID, MAXS_WID = roadlines_info["width"]
+    MIND_SIZ, MAXD_SIZ = roadlines_info["section_size"]
+    MIND_DIS, MAXD_DIS = roadlines_info["section_distance"]
+    MIN_XDIS, MAX_XDIS = roadlines_info["sublines_distance"]
+    SEED = json_file["processing"]["seed"]
+    _, MAXBLUR = fx_info["blur"]
+    _, MAXCONTRAST = fx_info["contrast"]
+    _, MAXBRIGHT = fx_info["brightness"]
+    _, MAXAGE = fx_info["aging"]
 
     # Generating the templates layer:
     overlay = generate_empty_templates_layer((WIDTH, HEIGHT))
@@ -204,19 +202,15 @@ def main():
         json_file = json.load(f)
 
     # Getting the parameters from the JSON file:
-    WIDTH = json_file["IMAGE_DIMENSIONS"]["WIDTH"]
-    HEIGHT = json_file["IMAGE_DIMENSIONS"]["HEIGHT"]
-    PATHS = json_file["PATHS"]
-    GROUND_TEXTURES = PATHS["GROUND_TEXTURES"]
-    BACKGROUNDS = PATHS["BACKGROUND_IMAGES"]
-    DES_FOLDER = PATHS["DESTINY_FOLDER"]
-    NUMI = json_file["IMAGES"]
-    JOBS = json_file["JOBS"]
-
-    images_counter = 0 # To generate filename
+    dataset_info = json_file["dataset"]
+    GROUND_TEXTURES = dataset_info["elements_paths"]["ground_textures"]
+    BACKGROUNDS = dataset_info["elements_paths"]["backgrounds"]
+    DES_FOLDER = dataset_info["title"]
+    NUMI = dataset_info["length"]
+    JOBS = json_file["processing"]["jobs"]
 
     # Loading the roadmarks templates:
-    arrows_collection = drw.ArrowCollection(PATHS["MODELS"])
+    arrows_collection = drw.ArrowCollection(dataset_info["elements_paths"]["models"])
 
     # Loading ground textures:
     ground_textures = list_images(GROUND_TEXTURES)
